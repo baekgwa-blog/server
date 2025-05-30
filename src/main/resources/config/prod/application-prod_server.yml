@@ -1,0 +1,29 @@
+server:
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 8192
+    accept-count: 100
+    uri-encoding: UTF-8
+    max-http-form-post-size: 2MB
+    max-swallow-size: 2MB
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 2KB
+
+frontend:
+  url: ${FRONTEND_URL}

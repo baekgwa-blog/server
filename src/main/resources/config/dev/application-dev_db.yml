@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${RDBMS_URL}
+    username: ${RDBMS_USERNAME}
+    password: ${RDBMS_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+      open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    locations: classpath:db/migration
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      logging: slf4j
+      multiline: true
