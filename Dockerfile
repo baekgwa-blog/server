@@ -2,6 +2,11 @@
 FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
 COPY . .
+
+# 실행 권한 부여
+RUN chmod +x ./gradlew
+
+# build
 RUN ./gradlew clean build -x test
 
 # 2. Run Stage
