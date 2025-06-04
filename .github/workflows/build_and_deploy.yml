@@ -49,10 +49,11 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
             docker stop baekgwa-server || true
             docker rm baekgwa-server || true
-
+            docker image prune -af
+            
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
             docker run -d --name baekgwa-server \
               --restart always \
               --network baekgwa-network \
@@ -66,5 +67,3 @@ jobs:
               -e JWT_TOKEN_EXPIRATION=${{ secrets.JWT_TOKEN_EXPIRATION }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
-
-            docker image prune -af
