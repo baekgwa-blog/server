@@ -46,7 +46,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws ServletException, IOException {
 
 		// 1. Token cookie 에서 추출
-		String accessToken = Arrays.stream(request.getCookies())
+		Cookie[] cookies = request.getCookies();
+		if(cookies == null) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		String accessToken = Arrays.stream(cookies)
 			.filter(cookie -> cookie.getName().equals("accessToken"))
 			.map(Cookie::getValue)
 			.findFirst()
