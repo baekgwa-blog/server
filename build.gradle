@@ -148,7 +148,7 @@ jacocoTestCoverageVerification {
             excludes = [
                     '**/global/**',
                     '**/infra/**',
-                    '**/CoTreeApplication*'
+                    '**/BlogServerApplication*'
             ]
         }
     }
