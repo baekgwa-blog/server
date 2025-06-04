@@ -6,8 +6,9 @@ spring:
       - optional:file:.env[.properties]
       - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_db.yml
       - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_server.yml
+      - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_auth.yml
   profiles:
     group:
-      dev: [ "dev_db", "dev_server" ]
-      prod: [ "prod_db", "prod_server" ]
+      dev: [ "dev_db", "dev_server", "dev_auth" ]
+      prod: [ "prod_db", "prod_server", "prod_auth" ]
     active: dev

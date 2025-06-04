@@ -21,6 +21,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum SuccessCode {
 
+	//회원
+	LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공."),
+	LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공."),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 
