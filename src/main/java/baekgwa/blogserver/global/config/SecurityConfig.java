@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -13,10 +15,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import baekgwa.blogserver.global.entrypoint.CustomAuthenticationEntryPoint;
 import baekgwa.blogserver.global.environment.FrontEndProperties;
+import baekgwa.blogserver.global.filter.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -36,10 +41,17 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final FrontEndProperties frontEndProperties;
+	private final AuthenticationFilter authenticationFilter;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+		return configuration.getAuthenticationManager();
 	}
 
 	@Bean
@@ -51,11 +63,10 @@ public class SecurityConfig {
 			// ✅ 기본 인증 방식 비활성화 (JWT 사용)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
 			// ✅ Cors Setting
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-			.sessionManagement(
-				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
 			// ✅ End-point Setting
 			.authorizeHttpRequests(authorize -> authorize
@@ -65,7 +76,18 @@ public class SecurityConfig {
 				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
 					"/swagger-ui.html").permitAll()
 				.requestMatchers(GET, "/health").permitAll()
+
+				// Authentication
+				.requestMatchers(POST, "/auth/login").permitAll()
+				.requestMatchers(POST, "/auth/logout").permitAll()
 				.anyRequest().authenticated());
+
+		// ❗ 인증 Filter 추가
+		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+		// ❗ AuthenticationEntryPoint Custom Handler
+		http.exceptionHandling((exception) -> exception
+			.authenticationEntryPoint(customAuthenticationEntryPoint));
 
 		return http.build();
 	}

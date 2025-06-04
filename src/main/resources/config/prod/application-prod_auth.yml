@@ -1,0 +1,5 @@
+auth:
+  loginId: ${LOGIN_ID}
+  loginPw: ${LOGIN_PASSWORD}
+  secretKey: ${JWT_SECRET_KEY}
+  tokenExpiration: ${JWT_TOKEN_EXPIRATION}
