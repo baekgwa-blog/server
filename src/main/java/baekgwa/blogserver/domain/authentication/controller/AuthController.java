@@ -16,7 +16,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * PackageName : baekgwa.blogserver.domain.authentication.controller
@@ -32,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-@Slf4j
 @Tag(name = "Authentication Controller", description = "회원 인증")
 public class AuthController {
 

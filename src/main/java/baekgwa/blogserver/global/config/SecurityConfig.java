@@ -80,14 +80,17 @@ public class SecurityConfig {
 				// Authentication
 				.requestMatchers(POST, "/auth/login").permitAll()
 				.requestMatchers(POST, "/auth/logout").permitAll()
+
+				// Category
+				.requestMatchers(GET, "/category").permitAll()
+
 				.anyRequest().authenticated());
 
 		// ❗ 인증 Filter 추가
 		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		// ❗ AuthenticationEntryPoint Custom Handler
-		http.exceptionHandling((exception) -> exception
-			.authenticationEntryPoint(customAuthenticationEntryPoint));
+		http.exceptionHandling(exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint));
 
 		return http.build();
 	}
