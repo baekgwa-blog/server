@@ -8,7 +8,7 @@ import lombok.Setter;
 
 /**
  * PackageName : baekgwa.blogserver.global.environment
- * FileName    : FrontEndProperties
+ * FileName    : UrlProperties
  * Author      : Baekgwa
  * Date        : 2025-05-30
  * Description : 
@@ -20,7 +20,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @Component
-@ConfigurationProperties(prefix = "frontend")
-public class FrontEndProperties {
-	private String url;
+@ConfigurationProperties(prefix = "url")
+public class UrlProperties {
+	private String frontend;
+	private String backend;
 }

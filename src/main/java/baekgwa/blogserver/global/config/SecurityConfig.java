@@ -20,7 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import baekgwa.blogserver.global.entrypoint.CustomAuthenticationEntryPoint;
-import baekgwa.blogserver.global.environment.FrontEndProperties;
+import baekgwa.blogserver.global.environment.UrlProperties;
 import baekgwa.blogserver.global.filter.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
@@ -40,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final FrontEndProperties frontEndProperties;
+	private final UrlProperties urlProperties;
 	private final AuthenticationFilter authenticationFilter;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
@@ -98,7 +98,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of(frontEndProperties.getUrl()));
+		configuration.setAllowedOrigins(List.of(urlProperties.getFrontend(), urlProperties.getBackend()));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 		configuration.setAllowCredentials(true);
 		// configuration.setAllowedHeaders(List.of("Authorization")); // 필요에 따라 open 예정.
