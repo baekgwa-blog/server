@@ -61,6 +61,7 @@ jobs:
               -e RDBMS_USERNAME=${{ secrets.RDBMS_USERNAME }} \
               -e RDBMS_PASSWORD=${{ secrets.RDBMS_PASSWORD }} \
               -e FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
+              -e API_SERVER_URL=${{ secrets.API_SERVER_URL }} \
               -e LOGIN_ID=${{ secrets.LOGIN_ID }} \
               -e LOGIN_PASSWORD=${{ secrets.LOGIN_PASSWORD }} \
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \

@@ -25,5 +25,6 @@ spring:
       max-request-size: 100MB
       file-size-threshold: 2KB
 
-frontend:
-  url: ${FRONTEND_URL}
+url:
+  frontend: ${FRONTEND_URL}
+  backend: ${API_SERVER_URL}

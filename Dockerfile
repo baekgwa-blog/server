@@ -7,7 +7,7 @@ COPY . .
 RUN chmod +x ./gradlew
 
 # build
-RUN ./gradlew clean build -x test
+RUN ./gradlew clean build
 
 # 2. Run Stage
 FROM eclipse-temurin:21-jre
