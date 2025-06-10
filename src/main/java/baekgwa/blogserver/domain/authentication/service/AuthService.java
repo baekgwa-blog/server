@@ -31,7 +31,8 @@ public class AuthService {
 	public AuthResponse.Login login(AuthRequest.Login requestDto) {
 		// 검증
 		if(!adminProperties.getLoginId().equals(requestDto.getLoginId()) ||
-			!adminProperties.getLoginPw().equals(requestDto.getPassword())) {
+			!adminProperties.getLoginPw().equals(requestDto.getPassword())
+		) {
 			throw new GlobalException(ErrorCode.INVALID_LOGIN_INFO);
 		}
 

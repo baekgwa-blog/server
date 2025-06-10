@@ -54,6 +54,8 @@ public class CategoryService {
 	public void deleteCategory(String categoryName) {
 		long deleteCount = categoryRepository.deleteByName(categoryName);
 
-		if(deleteCount <= 0) throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
+		if(deleteCount <= 0) {
+			throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
+		}
 	}
 }

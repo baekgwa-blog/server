@@ -25,5 +25,9 @@ public class AuthRequest {
 	public static class Login {
 		private String loginId;
 		private String password;
+
+		public static Login of(String loginId, String password) {
+			return new Login(loginId, password);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package baekgwa.blogserver.domain.authentication.controller;
 
+import static baekgwa.blogserver.global.constants.TokenConstant.*;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +48,7 @@ public class AuthController {
 		AuthResponse.Login authResponseLogin = authService.login(requestDto);
 
 		// 쿠키 추가
-		Cookie accessTokenCookie = new Cookie("accessToken", authResponseLogin.getAccessToken());
+		Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_KEY, authResponseLogin.getAccessToken());
 		accessTokenCookie.setHttpOnly(true);
 		accessTokenCookie.setPath("/");
 		// accessTokenCookie.setSecure(true); // prod에서만
@@ -58,7 +60,7 @@ public class AuthController {
 	@PostMapping("/logout")
 	@Operation(summary = "로그아웃")
 	public BaseResponse<Void> logout(HttpServletResponse response) {
-		Cookie deleteCookie = new Cookie("accessToken", null);
+		Cookie deleteCookie = new Cookie(ACCESS_TOKEN_KEY, null);
 		deleteCookie.setPath("/");
 		deleteCookie.setMaxAge(0); // 즉시 만료
 		deleteCookie.setHttpOnly(true);

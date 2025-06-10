@@ -24,5 +24,9 @@ public class CategoryRequest {
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class CreateCategory {
 		private String name;
+
+		public static CreateCategory of(String name) {
+			return new CreateCategory(name);
+		}
 	}
 }
