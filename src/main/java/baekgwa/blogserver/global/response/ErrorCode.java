@@ -26,6 +26,10 @@ public enum ErrorCode {
 	EXPIRED_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "1002", "로그인 정보가 만료되었습니다. 다시 로그인 해주세요."),
 	NEED_LOGIN(HttpStatus.UNAUTHORIZED, "1003", "로그인이 필요합니다."),
 
+	//Category : 2001 : 2999
+	DUPLICATION_CATEGORY(HttpStatus.BAD_REQUEST, "1004", "이미 생성된 카테고리 입니다."),
+	NOT_EXIST_CATEGORY(HttpStatus.BAD_REQUEST, "1005", "존재하지 않는 카테고리 입니다."),
+
 	//Common: 9001 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),
 	NOT_SUPPORTED_METHOD(HttpStatus.METHOD_NOT_ALLOWED, "9002", "요청 메서드를 찾을 수 없습니다."),

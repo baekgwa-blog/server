@@ -76,6 +76,8 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
+    finalizedBy 'printJacocoCoverage'
 }
 
 
@@ -102,10 +104,6 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
-tasks.named('test') {
-    finalizedBy 'jacocoTestReport'
-}
-
 tasks.named('jacocoTestReport') {
     reports {
         xml.required.set(true)
@@ -118,9 +116,10 @@ jacocoTestReport {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, exclude: [
-                            '**/global/**',
-                            '**/infra/**',
-                            '**/CoTreeApplication*'
+                            'baekgwa/blogserver/global/**',
+                            'baekgwa/blogserver/infra/**',
+                            'baekgwa/blogserver/BlogServerApplication.class',
+                            '**/Q*'
                     ])
                 })
         )
@@ -129,14 +128,25 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'baekgwa/blogserver/global/**',
+                    'baekgwa/blogserver/infra/**',
+                    'baekgwa/blogserver/BlogServerApplication.class',
+                    '**/Q*'
+            ])
+        }))
+    }
+
     violationRules {
         rule {
-            enabled = false
-//            element = 'CLASS'
+            enabled = true
+            element = 'CLASS'
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.90
+                minimum = 0.70
             }
 
             limit {
@@ -144,12 +154,44 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.80
             }
+        }
+    }
+}
 
-            excludes = [
-                    '**/global/**',
-                    '**/infra/**',
-                    '**/BlogServerApplication*'
-            ]
+import javax.xml.parsers.DocumentBuilderFactory
+import org.xml.sax.EntityResolver
+import org.xml.sax.InputSource
+
+tasks.register('printJacocoCoverage') {
+    dependsOn tasks.named('jacocoTestReport')
+    doLast {
+        def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
+        if (reportFile.exists()) {
+            def dbFactory = DocumentBuilderFactory.newInstance()
+            dbFactory.setValidating(false) // DTD 검증 비활성화
+            def dBuilder = dbFactory.newDocumentBuilder()
+
+            // DTD 무시 EntityResolver
+            dBuilder.setEntityResolver({ publicId, systemId ->
+                new InputSource(new StringReader(""))
+            } as EntityResolver)
+
+            def doc = dBuilder.parse(reportFile)
+            doc.documentElement.normalize()
+            def counters = doc.getDocumentElement().getElementsByTagName("counter")
+            for (int i = 0; i < counters.getLength(); i++) {
+                def node = counters.item(i)
+                if (node.getParentNode().isSameNode(doc.documentElement)) {
+                    def type = node.getAttributes().getNamedItem("type").getTextContent()
+                    def covered = node.getAttributes().getNamedItem("covered").getTextContent().toInteger()
+                    def missed = node.getAttributes().getNamedItem("missed").getTextContent().toInteger()
+                    def total = covered + missed
+                    def percent = total == 0 ? 0 : (covered * 100) / total
+                    println "[JaCoCo] TOTAL ${type} COVERAGE: ${percent}% (${covered}/${total})"
+                }
+            }
+        } else {
+            println "[JaCoCo] No jacocoTestReport.xml found."
         }
     }
 }

@@ -25,6 +25,10 @@ public enum SuccessCode {
 	LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공."),
 	LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공."),
 
+	//카테고리
+	CREATE_CATEGORY_SUCCESS(HttpStatus.CREATED, "카테고리 생성 완료."),
+	DELETE_CATEGORY_SUCCESS(HttpStatus.OK, "카테고리 삭제 완료."),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 

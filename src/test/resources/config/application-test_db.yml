@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:test;MODE=MYSQL;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:test;MODE=MYSQL;
     username: sa
     password:
   jpa:
@@ -12,11 +12,12 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         default_batch_fetch_size: 100
       open-in-view: false
-
+  flyway:
+    enabled: false
 
 decorator:
   datasource:
     p6spy:
-      enable-logging: true
+      enable-logging: false
       logging: slf4j
       multiline: true
