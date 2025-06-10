@@ -11,7 +11,9 @@
 
 CREATE TABLE `category`
 (
-    `id`   BIGINT       NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL,
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `name`        VARCHAR(255) NOT NULL,
+    `created_at`  DATETIME     NOT NULL,
+    `modified_at` DATETIME     NOT NULL,
     PRIMARY KEY `pk_category_id` (`id`)
 )
