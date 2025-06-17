@@ -84,6 +84,9 @@ public class SecurityConfig {
 				// Category
 				.requestMatchers(GET, "/category").permitAll()
 
+				// Tag
+				.requestMatchers(GET, "/tag").permitAll()
+
 				.anyRequest().authenticated());
 
 		// ❗ 인증 Filter 추가

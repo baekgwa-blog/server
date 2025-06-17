@@ -29,6 +29,10 @@ public enum SuccessCode {
 	CREATE_CATEGORY_SUCCESS(HttpStatus.CREATED, "카테고리 생성 완료."),
 	DELETE_CATEGORY_SUCCESS(HttpStatus.OK, "카테고리 삭제 완료."),
 
+	//태그
+	CREATE_TAG_SUCCESS(HttpStatus.CREATED, "태그 생성 완료."),
+	DELETE_TAG_SUCCESS(HttpStatus.OK, "태그 삭제 완료."),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 

@@ -10,8 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import baekgwa.blogserver.domain.authentication.service.AuthService;
 import baekgwa.blogserver.domain.category.service.CategoryService;
+import baekgwa.blogserver.domain.tag.service.TagService;
 import baekgwa.blogserver.integration.factory.CategoryDataFactory;
+import baekgwa.blogserver.integration.factory.TagDataFactory;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
+import baekgwa.blogserver.model.tag.repository.TagRepository;
 import jakarta.persistence.EntityManager;
 
 /**
@@ -41,6 +44,8 @@ public abstract class SpringBootTestSupporter {
 	 */
 	@Autowired
 	protected CategoryDataFactory categoryDataFactory;
+	@Autowired
+	protected TagDataFactory tagDataFactory;
 
 	/**
 	 * Common
@@ -55,6 +60,8 @@ public abstract class SpringBootTestSupporter {
 	 */
 	@Autowired
 	protected CategoryRepository categoryRepository;
+	@Autowired
+	protected TagRepository tagRepository;
 
 	/**
 	 * service
@@ -63,6 +70,8 @@ public abstract class SpringBootTestSupporter {
 	protected CategoryService categoryService;
 	@Autowired
 	protected AuthService authService;
+	@Autowired
+	protected TagService tagService;
 
 	/**
 	 * MockBean
