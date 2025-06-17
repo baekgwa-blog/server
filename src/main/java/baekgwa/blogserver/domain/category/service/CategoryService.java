@@ -57,5 +57,7 @@ public class CategoryService {
 		if(deleteCount <= 0) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
 		}
+
+		//todo : 이미 글에 카테고리가 할당된 경우, 어떻게 처리할지 고민 필요.
 	}
 }
