@@ -1,5 +1,6 @@
 package baekgwa.blogserver.model.tag.entity;
 
+import baekgwa.blogserver.global.entity.TemporalEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class TagEntity {
+public class TagEntity extends TemporalEntity {
 
 	@Id
 	@Column(name = "id")

@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,9 +33,6 @@ public class PageResponse<T> {
 	private final boolean isFirst;
 	private final boolean hasNext;
 	private final boolean hasPrevious;
-
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final Double reviewAvgRating;
 
 	public static <T> PageResponse<T> of(Page<T> page) {
 		return PageResponse

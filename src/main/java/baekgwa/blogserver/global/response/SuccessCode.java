@@ -33,6 +33,10 @@ public enum SuccessCode {
 	CREATE_TAG_SUCCESS(HttpStatus.CREATED, "태그 생성 완료."),
 	DELETE_TAG_SUCCESS(HttpStatus.OK, "태그 삭제 완료."),
 
+	//포스팅
+	CREATE_POST_SUCCESS(HttpStatus.CREATED, "포스팅 완료"),
+	DELETE_POST_SUCCESS(HttpStatus.OK, "포스트 삭제 완료"),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 

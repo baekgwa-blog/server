@@ -14,6 +14,7 @@ import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.integration.SpringBootTestSupporter;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.tag.entity.TagEntity;
 
 /**
  * PackageName : baekgwa.blogserver.domain.category.service
@@ -96,5 +97,21 @@ class CategoryServiceTest extends SpringBootTestSupporter {
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_CATEGORY);
+	}
+
+	@DisplayName("해당 카테고리를 가지는 글이 이미 작성되어있으면, 카테고리는 삭제할 수 없습니다.")
+	@Test
+	void deleteCategory3() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		postDataFactory.newPostList(1, saveTagList, saveCategory);
+		String saveCategoryName = saveCategory.getName();
+
+		// when // then
+		assertThatThrownBy(() -> categoryService.deleteCategory(saveCategoryName))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.REGISTERED_CATEGORY_POST);
 	}
 }

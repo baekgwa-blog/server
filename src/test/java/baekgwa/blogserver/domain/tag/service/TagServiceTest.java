@@ -14,6 +14,8 @@ import baekgwa.blogserver.domain.tag.dto.TagResponse;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.integration.SpringBootTestSupporter;
+import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 
 /**
@@ -82,6 +84,22 @@ class TagServiceTest extends SpringBootTestSupporter {
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_TAG);
+	}
+
+	@DisplayName("태그는 할당된 글이 있어도 삭제 가능합니다. 글은 지워지지 않아야 합니다.")
+	@Test
+	void deleteTag3() {
+		// given
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
+
+		// when
+		tagService.deleteTag(saveTagList.getFirst().getName());
+
+		// then
+		assertThat(tagRepository.existsByName(saveTagList.getFirst().getName())).isFalse();
+		assertThat(postRepository.findById(savePost.getId())).isPresent();
 	}
 
 	@DisplayName("태그 목록을 조회합니다. 키워드가 빈값이면 전체 검색으로 진행됩니다.")
