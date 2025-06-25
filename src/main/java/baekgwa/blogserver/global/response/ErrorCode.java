@@ -29,10 +29,16 @@ public enum ErrorCode {
 	//Category : 2000 : 2999
 	DUPLICATION_CATEGORY(HttpStatus.BAD_REQUEST, "2000", "이미 생성된 카테고리 입니다."),
 	NOT_EXIST_CATEGORY(HttpStatus.BAD_REQUEST, "2001", "존재하지 않는 카테고리 입니다."),
+	REGISTERED_CATEGORY_POST(HttpStatus.BAD_REQUEST, "2002", "해당 카테고리로 존재하는 글이 존재합니다."),
 
-	//Category : 3000 : 3999
+	//Tag : 3000 : 3999
 	DUPLICATION_TAG(HttpStatus.BAD_REQUEST, "3000", "이미 생성된 태그 입니다."),
 	NOT_EXIST_TAG(HttpStatus.BAD_REQUEST, "3001", "존재하지 않는 태그 입니다."),
+	NOT_EXIST_TAG_LIST(HttpStatus.BAD_REQUEST, "3002", "존재하지 않는 태그가 존재합니다. 태그 목록을 확인해주세요."),
+
+	//Post : 4000 : 4999
+	DUPLICATION_POST_TITLE(HttpStatus.BAD_REQUEST, "4000", "중복된 제목 입니다."),
+	NOT_EXIST_POST(HttpStatus.BAD_REQUEST, "4001", "글을 찾을 수 없습니다."),
 
 	//Common: 9000 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),
@@ -41,6 +47,7 @@ public enum ErrorCode {
 	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "9004", "올바르지 않은 입력값입니다."),
 	HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "9007", "요청이 거부되었습니다."),
 	METHOD_ARGUMENT_TYPE_MISS_MATCH(HttpStatus.BAD_REQUEST, "9008", "요청 파라미터 타입 불일치. API 문서 확인해주세요."),
+	INVALID_PAGINATION_PARAMETER(HttpStatus.BAD_REQUEST, "9009", "올바르지 않은 페이지 네이션 파라미터 요청입니다."),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "9999", "서버 내부 오류 발생했습니다");
 
 	private final HttpStatus status;

@@ -50,8 +50,6 @@ public class TagService {
 		if (deleteCount <= 0) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_TAG);
 		}
-
-		//todo : 이미 글에 태그가 할당된 경우, 어떻게 처리할지 고민 필요.
 	}
 
 	@Transactional(readOnly = true)

@@ -11,6 +11,7 @@ import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
+import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CategoryService {
 	private final CategoryRepository categoryRepository;
+	private final PostRepository postRepository;
 
 	@Transactional
 	public void create(CategoryRequest.CreateCategory createCategory) {
@@ -52,12 +54,17 @@ public class CategoryService {
 
 	@Transactional
 	public void deleteCategory(String categoryName) {
-		long deleteCount = categoryRepository.deleteByName(categoryName);
+		// 1. Category Entity 조회
+		CategoryEntity findCategory = categoryRepository.findByName(categoryName)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_CATEGORY));
 
-		if(deleteCount <= 0) {
-			throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
+		// 2. 해당 카테고리로 연결된 글이 있는지 확인
+		//		연결된 글이 있으면, 삭제 불가능.
+		if (postRepository.existsByCategory(findCategory)) {
+			throw new GlobalException(ErrorCode.REGISTERED_CATEGORY_POST);
 		}
 
-		//todo : 이미 글에 카테고리가 할당된 경우, 어떻게 처리할지 고민 필요.
+		// 3. entity 삭제
+		categoryRepository.delete(findCategory);
 	}
 }
