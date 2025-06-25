@@ -78,8 +78,8 @@ public class PostService {
 		String generatedSlug = generateSlug(request.getTitle());
 
 		// 6. 포스트(카테고리 포함) 생성 / 저장
-		PostEntity newPost = PostEntity.of(request.getTitle(), request.getContent(), request.getThumbnailImage(),
-			generatedSlug, findCategory);
+		PostEntity newPost = PostEntity.of(request.getTitle(), request.getContent(), request.getDescription(),
+			request.getThumbnailImage(), generatedSlug, findCategory);
 		postRepository.save(newPost);
 
 		// 7. 포스팅 태그 생성 / 저장

@@ -42,8 +42,8 @@ class PostServiceTest extends SpringBootTestSupporter {
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "썸네일이미지", saveTagIdList,
-			saveCategory.getId());
+		PostRequest.CreatePost request =
+			PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일이미지", saveTagIdList, saveCategory.getId());
 
 		// when
 		PostResponse.CreatePostResponse response = postService.create(request);
@@ -68,8 +68,8 @@ class PostServiceTest extends SpringBootTestSupporter {
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of(savePost.getTitle(), "내용", "썸네일이미지", saveTagIdList,
-			saveCategory.getId());
+		PostRequest.CreatePost request =
+			PostRequest.CreatePost.of(savePost.getTitle(), "내용", "설명", "썸네일이미지", saveTagIdList, saveCategory.getId());
 
 		// when // then
 		assertThatThrownBy(() -> postService.create(request))
@@ -84,7 +84,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		// given
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "썸네일이미지", saveTagIdList, 1L);
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일이미지", saveTagIdList, 1L);
 
 		// when // then
 		assertThatThrownBy(() -> postService.create(request))
@@ -105,7 +105,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		saveTagIdList.add(-1L);
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		PostRequest.CreatePost request =
-			PostRequest.CreatePost.of("제목", "내용", "썸네일이미지", saveTagIdList, saveCategory.getId());
+			PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일이미지", saveTagIdList, saveCategory.getId());
 
 		// when // then
 		assertThatThrownBy(() -> postService.create(request))
@@ -121,8 +121,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
 		Long saveCategoryId = categoryDataFactory.newCategoryList(1).getFirst().getId();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "![이미지](https://test.com/image.png)", "",
-			saveTagIdList, saveCategoryId);
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "![이미지](https://test.com/image.png)", "", "", saveTagIdList, saveCategoryId);
 
 		// when
 		PostResponse.CreatePostResponse response = postService.create(request);
@@ -140,7 +139,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
 		Long saveCategoryId = categoryDataFactory.newCategoryList(1).getFirst().getId();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "", saveTagIdList, saveCategoryId);
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "", "", saveTagIdList, saveCategoryId);
 
 		// when
 		postService.create(request);

@@ -14,6 +14,7 @@ CREATE TABLE `post`
     `id`              BIGINT           NOT NULL AUTO_INCREMENT,
     `title`           VARCHAR(255)     NOT NULL,
     `content`         TEXT             NOT NULL,
+    `description`     VARCHAR(255)     NOT NULL,
     `view_count`      INTEGER UNSIGNED NOT NULL DEFAULT 0,
     `category_id`     BIGINT           NOT NULL,
     `thumbnail_image` text             NULL,

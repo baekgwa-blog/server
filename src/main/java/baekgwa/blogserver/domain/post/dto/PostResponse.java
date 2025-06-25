@@ -42,6 +42,7 @@ public class PostResponse {
 		private Long id;
 		private String title;
 		private String content;
+		private String description;
 		private String thumbnailImage;
 		private String slug;
 		private List<String> tagList;
@@ -53,6 +54,7 @@ public class PostResponse {
 				.id(post.getId())
 				.title(post.getTitle())
 				.content(post.getContent())
+				.description(post.getDescription())
 				.thumbnailImage(post.getThumbnailImage())
 				.slug(post.getSlug())
 				.tagList(tagList)
@@ -67,7 +69,7 @@ public class PostResponse {
 	public static class GetPostResponse {
 		private final Long id;
 		private final String title;
-		private final String content;
+		private final String description;
 		private final String thumbnailImage;
 		private final String slug;
 		private final Integer viewCount;
@@ -81,7 +83,7 @@ public class PostResponse {
 				.builder()
 				.id(post.getId())
 				.title(post.getTitle())
-				.content(post.getContent())
+				.description(post.getDescription())
 				.thumbnailImage(post.getThumbnailImage())
 				.slug(post.getSlug())
 				.viewCount(post.getViewCount())

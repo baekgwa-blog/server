@@ -43,8 +43,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(5);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "썸네일url", saveTagIdList,
-			saveCategory.getId());
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList, saveCategory.getId());
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/post")
@@ -68,8 +67,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(5);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "썸네일url", saveTagIdList,
-			saveCategory.getId());
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList, saveCategory.getId());
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/post/detail")
@@ -131,7 +129,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.content").isArray())
 			.andExpect(jsonPath("$.data.content.length()").value(5))
 			.andExpect(jsonPath("$.data.content[0].title").isNotEmpty())
-			.andExpect(jsonPath("$.data.content[0].content").isNotEmpty())
+			.andExpect(jsonPath("$.data.content[0].description").isNotEmpty())
 			.andExpect(jsonPath("$.data.content[0].thumbnailImage").isNotEmpty())
 			.andExpect(jsonPath("$.data.content[0].slug").isNotEmpty())
 			.andExpect(jsonPath("$.data.content[0].viewCount").isNumber())

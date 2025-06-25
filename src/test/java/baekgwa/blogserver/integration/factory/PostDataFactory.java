@@ -47,8 +47,9 @@ public class PostDataFactory {
 			String content = "내용" + index;
 			String thumbnail = "썸네일이미지" + index;
 			String slug = "slug-" + index;
+			String description = "설명" + index;
 
-			PostEntity newPost = PostEntity.of(title, content, thumbnail, slug, saveCategory);
+			PostEntity newPost = PostEntity.of(title, content, description, thumbnail, slug, saveCategory);
 			newPostList.add(newPost);
 
 			for (TagEntity saveTag : saveTagList) {

@@ -47,6 +47,9 @@ public class PostEntity extends TemporalEntity {
 	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
+	@Column(name = "description", nullable = false)
+	private String description;
+
 	@Column(name = "view_count", nullable = false)
 	private Integer viewCount;
 
@@ -60,12 +63,13 @@ public class PostEntity extends TemporalEntity {
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category;
 
-	public static PostEntity of(String title, String content, String thumbnailImage, String slug,
+	public static PostEntity of(String title, String content, String description, String thumbnailImage, String slug,
 		CategoryEntity category) {
 		return PostEntity
 			.builder()
 			.title(title)
 			.content(content)
+			.description(description)
 			.viewCount(0)
 			.thumbnailImage(thumbnailImage)
 			.slug(slug)
