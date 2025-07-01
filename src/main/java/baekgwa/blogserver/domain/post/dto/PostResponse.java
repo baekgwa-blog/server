@@ -47,6 +47,9 @@ public class PostResponse {
 		private String slug;
 		private List<String> tagList;
 		private String category;
+		private String author;
+		private LocalDateTime createdAt;
+		private LocalDateTime modifiedAt;
 
 		public static GetPostDetailResponse of(PostEntity post, List<String> tagList) {
 			return GetPostDetailResponse
@@ -59,6 +62,9 @@ public class PostResponse {
 				.slug(post.getSlug())
 				.tagList(tagList)
 				.category(post.getCategory().getName())
+				.author("백과")
+				.createdAt(post.getCreatedAt())
+				.modifiedAt(post.getModifiedAt())
 				.build();
 		}
 	}
