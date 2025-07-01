@@ -18,6 +18,7 @@ import baekgwa.blogserver.domain.post.type.PostListSort;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
+import baekgwa.blogserver.global.util.SlugUtil;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
@@ -75,7 +76,7 @@ public class PostService {
 		}
 
 		// 5. 슬러그 생성 (제목으로 슬러그 생성)
-		String generatedSlug = generateSlug(request.getTitle());
+		String generatedSlug = SlugUtil.generateSlug(request.getTitle());
 
 		// 6. 포스트(카테고리 포함) 생성 / 저장
 		PostEntity newPost = PostEntity.of(request.getTitle(), request.getContent(), request.getDescription(),
@@ -148,9 +149,5 @@ public class PostService {
 		}
 
 		return markdownMatcher.group(1);
-	}
-
-	private String generateSlug(String title) {
-		return title.replace(' ', '-');
 	}
 }

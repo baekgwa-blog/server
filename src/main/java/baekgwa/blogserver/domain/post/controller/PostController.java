@@ -64,7 +64,7 @@ public class PostController {
 	public BaseResponse<PageResponse<PostResponse.GetPostResponse>> searchPostList(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "page", required = false, defaultValue = "0") final int page,
-		@RequestParam(value = "size", required = false, defaultValue = "5") final int size,
+		@RequestParam(value = "size", required = false, defaultValue = "6") final int size,
 		@RequestParam(value = "category", required = false) final String category,
 		@RequestParam(value = "sort", required = false, defaultValue = "LATEST") final PostListSort sort
 	) {

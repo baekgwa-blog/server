@@ -127,7 +127,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.message").value(SuccessCode.REQUEST_SUCCESS.getMessage()))
 			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.REQUEST_SUCCESS.getStatus().value())))
 			.andExpect(jsonPath("$.data.content").isArray())
-			.andExpect(jsonPath("$.data.content.length()").value(5))
+			.andExpect(jsonPath("$.data.content.length()").value(6))
 			.andExpect(jsonPath("$.data.content[0].title").isNotEmpty())
 			.andExpect(jsonPath("$.data.content[0].description").isNotEmpty())
 			.andExpect(jsonPath("$.data.content[0].thumbnailImage").isNotEmpty())
