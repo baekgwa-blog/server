@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import baekgwa.blogserver.domain.authentication.service.AuthService;
 import baekgwa.blogserver.domain.category.service.CategoryService;
 import baekgwa.blogserver.domain.post.service.PostService;
 import baekgwa.blogserver.domain.tag.service.TagService;
+import baekgwa.blogserver.infra.upload.FileUploader;
 import baekgwa.blogserver.integration.factory.CategoryDataFactory;
 import baekgwa.blogserver.integration.factory.PostDataFactory;
 import baekgwa.blogserver.integration.factory.TagDataFactory;
@@ -20,6 +22,7 @@ import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
 import jakarta.persistence.EntityManager;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * PackageName : baekgwa.blogserver.integration
@@ -88,4 +91,8 @@ public abstract class SpringBootTestSupporter {
 	/**
 	 * MockBean
 	 */
+	@MockitoBean
+	private S3Client s3Client;
+	@MockitoBean
+	protected FileUploader fileUploader;
 }

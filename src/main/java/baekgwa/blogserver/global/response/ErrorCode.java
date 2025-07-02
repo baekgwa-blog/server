@@ -40,6 +40,10 @@ public enum ErrorCode {
 	DUPLICATION_POST_TITLE(HttpStatus.BAD_REQUEST, "4000", "중복된 제목 입니다."),
 	NOT_EXIST_POST(HttpStatus.BAD_REQUEST, "4001", "글을 찾을 수 없습니다."),
 
+	//Upload : 5000 ~ 5999
+	INVALID_FILE(HttpStatus.BAD_REQUEST, "5000", "파일 업로드 실패. 잘못된 파일 입니다."),
+	FILE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "5001", "파일 업로드 실패, 재시도 혹은 관리자 문의해주세요."),
+
 	//Common: 9000 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),
 	NOT_SUPPORTED_METHOD(HttpStatus.METHOD_NOT_ALLOWED, "9002", "요청 메서드를 찾을 수 없습니다."),
