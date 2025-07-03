@@ -60,8 +60,7 @@ public class S3FileUploader implements FileUploader {
 			throw new GlobalException(ErrorCode.FILE_UPLOAD_FAIL);
 		}
 
-		String saveGetUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", s3Properties.getBucket(), s3Properties.getBucket(),
-			key);
+		String saveGetUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", s3Properties.getBucket(), s3Properties.getRegion(), key);
 		return new S3FileUploadResponse("image", saveGetUrl, s3Properties.getBucket());
 	}
 
