@@ -1,7 +1,10 @@
 package baekgwa.blogserver.global.environment;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * PackageName : baekgwa.blogserver.global.environment
@@ -14,8 +17,13 @@ import lombok.NoArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-07-02     Baekgwa               Initial creation
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public abstract class S3Properties {
-	public static final String REGION = "ap-northeast-2";
-	public static final String BUCKET = "baekgwa-blog-s3-bucket";
+@Setter
+@Getter
+@Component
+@ConfigurationProperties(prefix = "s3")
+public class S3Properties {
+	private String bucket;
+	private String region;
+	private String accessKey;
+	private String secretKey;
 }

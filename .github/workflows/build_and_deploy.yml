@@ -1,15 +1,19 @@
 name: Deploy Spring Boot to EC2 with Docker
 
+#on:
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - 'src/**'
+#      - 'build.gradle'
+#      - 'settings.gradle'
+#      - 'gradle/**'
+#      - 'Dockerfile'
+
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'build.gradle'
-      - 'settings.gradle'
-      - 'gradle/**'
-      - 'Dockerfile'
+  pull_request:
+    branches: [main]
 
 jobs:
   build-and-deploy:
@@ -66,5 +70,7 @@ jobs:
               -e LOGIN_PASSWORD=${{ secrets.LOGIN_PASSWORD }} \
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
               -e JWT_TOKEN_EXPIRATION=${{ secrets.JWT_TOKEN_EXPIRATION }} \
+              -e S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} \
+              -e S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest

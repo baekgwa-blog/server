@@ -36,6 +36,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 public class S3FileUploader implements FileUploader {
 
 	private final S3Client s3Client;
+	private final S3Properties s3Properties;
 
 	@Override
 	public FileUploadResponse uploadImage(FileType type, MultipartFile file) {
@@ -48,7 +49,7 @@ public class S3FileUploader implements FileUploader {
 		try {
 			PutObjectRequest objectRequest = PutObjectRequest
 				.builder()
-				.bucket(S3Properties.BUCKET)
+				.bucket(s3Properties.getBucket())
 				.key(key)
 				.contentType(resolveContentType(file))
 				.contentLength(file.getSize())
@@ -59,9 +60,9 @@ public class S3FileUploader implements FileUploader {
 			throw new GlobalException(ErrorCode.FILE_UPLOAD_FAIL);
 		}
 
-		String saveGetUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", S3Properties.BUCKET, S3Properties.REGION,
+		String saveGetUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", s3Properties.getBucket(), s3Properties.getBucket(),
 			key);
-		return new S3FileUploadResponse("image", saveGetUrl, S3Properties.BUCKET);
+		return new S3FileUploadResponse("image", saveGetUrl, s3Properties.getBucket());
 	}
 
 	/**
