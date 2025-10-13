@@ -1,9 +1,10 @@
 package baekgwa.blogserver.domain.post.service;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -139,15 +140,13 @@ public class PostService {
 	}
 
 	private String extractThumbnailByContent(@NonNull String content) {
-		// 마크다운 이미지 파싱: ![alt](url)
-		Pattern markdownImgPattern = Pattern.compile("!\\[[^\\]]*\\]\\(([^\\)]+)\\)");
-		Matcher markdownMatcher = markdownImgPattern.matcher(content);
+		Document doc = Jsoup.parse(content);
+		Element imgElement = doc.selectFirst("img");
 
-		// 이미지가 없을 경우
-		if (!markdownMatcher.find()) {
+		if (imgElement == null) {
 			return null;
 		}
 
-		return markdownMatcher.group(1);
+		return imgElement.attr("src");
 	}
 }

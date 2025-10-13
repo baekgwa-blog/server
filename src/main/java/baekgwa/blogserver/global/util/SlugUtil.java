@@ -25,7 +25,7 @@ public class SlugUtil {
 		String hyphenated = lower.replaceAll("[\\s/_\\.]+", "-");
 
 		// 3. 한글, 영문 소문자, 숫자, 하이픈만 남기고 나머지 제거 (이모지, 특수문자 제거)
-		String cleaned = hyphenated.replaceAll("[^a-z0-9가-힣-]", "");
+		String cleaned = hyphenated.replaceAll("[^a-z0-9ㄱ-ㅎㅏ-ㅣ가-힣-]", "");
 
 		// 4. 연속된 하이픈을 하나로 합치기
 		String singleHyphens = cleaned.replaceAll("-{2,}", "-");

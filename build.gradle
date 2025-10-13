@@ -74,6 +74,9 @@ dependencies {
     //S3
     implementation("software.amazon.awssdk:s3:2.31.11")
 
+    // Jsoup
+    implementation 'org.jsoup:jsoup:1.17.2'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

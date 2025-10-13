@@ -121,7 +121,10 @@ class PostServiceTest extends SpringBootTestSupporter {
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
 		Long saveCategoryId = categoryDataFactory.newCategoryList(1).getFirst().getId();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "![이미지](https://test.com/image.png)", "", "", saveTagIdList, saveCategoryId);
+		PostRequest.CreatePost request =
+			PostRequest.CreatePost.of("제목",
+				"<img src=\"https://test.com/image.png\">",
+				"", "", saveTagIdList, saveCategoryId);
 
 		// when
 		PostResponse.CreatePostResponse response = postService.create(request);
