@@ -2,8 +2,7 @@ package baekgwa.blogserver.domain.category.dto;
 
 import java.util.List;
 
-import baekgwa.blogserver.model.category.entity.CategoryEntity;
-import baekgwa.blogserver.model.category.repository.CategoryRepository;
+import baekgwa.blogserver.model.category.projection.CategoryPostCount;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +31,7 @@ public class CategoryResponse {
 		private final Long id;
 		private final Long count;
 
-		public static List<CategoryList> from(List<CategoryRepository.CategoryPostCount> categoryEntityList) {
+		public static List<CategoryList> from(List<CategoryPostCount> categoryEntityList) {
 			return categoryEntityList
 				.stream()
 				.map(data -> CategoryList

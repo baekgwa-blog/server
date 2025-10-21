@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.category.projection.CategoryPostCount;
 
 /**
  * PackageName : baekgwa.blogserver.model.category.repository
@@ -25,8 +26,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
 
 	Optional<CategoryEntity> findByName(String name);
 
-	record CategoryPostCount(CategoryEntity category, Long postCount) {}
-	@Query("SELECT new baekgwa.blogserver.model.category.repository.CategoryRepository$CategoryPostCount(c, COUNT(p.id)) " +
+	@Query("SELECT new baekgwa.blogserver.model.category.projection.CategoryPostCount(c, COUNT(p.id)) " +
 		"FROM CategoryEntity c LEFT JOIN PostEntity p ON c.id = p.category.id " +
 		"GROUP BY c.id " +
 		"ORDER BY c.name")

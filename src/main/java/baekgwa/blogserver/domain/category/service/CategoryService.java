@@ -10,6 +10,7 @@ import baekgwa.blogserver.domain.category.dto.CategoryResponse;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.category.projection.CategoryPostCount;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public List<CategoryResponse.CategoryList> getCategoryList() {
 
-		List<CategoryRepository.CategoryPostCount> findCategoryList = categoryRepository.findAllWithPostCount();
+		List<CategoryPostCount> findCategoryList = categoryRepository.findAllWithPostCount();
 
 		// 2. 응답 객체 변환 후, return
 		return CategoryResponse.CategoryList.from(findCategoryList);
