@@ -112,7 +112,8 @@ class CategoryControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.REQUEST_SUCCESS.getStatus().value())))
 			.andExpect(jsonPath("$.data").isArray())
 			.andExpect(jsonPath("$.data[0].name").exists())
-			.andExpect(jsonPath("$.data[0].id").exists());
+			.andExpect(jsonPath("$.data[0].id").exists())
+			.andExpect(jsonPath("$.data[0].count").exists());
 	}
 
 	@WithMockUser

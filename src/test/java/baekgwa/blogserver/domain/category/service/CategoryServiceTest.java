@@ -71,6 +71,25 @@ class CategoryServiceTest extends SpringBootTestSupporter {
 		assertThat(categoryList).hasSize(10);
 	}
 
+	@DisplayName("카테고리의 전체 목록을 조회할때 관련된 포스팅의 수량이 함께 집계됩니다.")
+	@Test
+	void getCategoryList2() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(6).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		postDataFactory.newPostList(10, saveTagList, saveCategory);
+
+		// when
+		List<CategoryResponse.CategoryList> findCategoryList = categoryService.getCategoryList();
+
+		// then
+		assertThat(findCategoryList).hasSize(6);
+		List<CategoryResponse.CategoryList> savedPostCategory = findCategoryList.stream()
+			.filter(data -> data.getName().equals(saveCategory.getName()))
+			.toList();
+		assertThat(savedPostCategory.getFirst().getCount()).isEqualTo(10L);
+	}
+
 	@DisplayName("특정 카테고리를 삭제합니다")
 	@Test
 	void deleteCategory1() {
