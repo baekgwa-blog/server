@@ -45,8 +45,8 @@ public class CategoryService {
 
 	@Transactional(readOnly = true)
 	public List<CategoryResponse.CategoryList> getCategoryList() {
-		// 1. category 이름순 기준으로 조회
-		List<CategoryEntity> findCategoryList = categoryRepository.findALlByOrderByName();
+
+		List<CategoryRepository.CategoryPostCount> findCategoryList = categoryRepository.findAllWithPostCount();
 
 		// 2. 응답 객체 변환 후, return
 		return CategoryResponse.CategoryList.from(findCategoryList);

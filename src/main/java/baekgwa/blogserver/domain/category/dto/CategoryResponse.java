@@ -3,6 +3,7 @@ package baekgwa.blogserver.domain.category.dto;
 import java.util.List;
 
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,14 +30,16 @@ public class CategoryResponse {
 	public static class CategoryList {
 		private final String name;
 		private final Long id;
+		private final Long count;
 
-		public static List<CategoryList> from(List<CategoryEntity> categoryEntityList) {
+		public static List<CategoryList> from(List<CategoryRepository.CategoryPostCount> categoryEntityList) {
 			return categoryEntityList
 				.stream()
-				.map(e -> CategoryList
+				.map(data -> CategoryList
 					.builder()
-					.name(e.getName())
-					.id(e.getId())
+					.name(data.category().getName())
+					.id(data.category().getId())
+					.count(data.postCount())
 					.build())
 				.toList();
 		}
