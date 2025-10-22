@@ -1,0 +1,94 @@
+package baekgwa.blogserver.domain.stack.controller;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+
+import baekgwa.blogserver.domain.stack.dto.StackRequest;
+import baekgwa.blogserver.global.response.ErrorCode;
+import baekgwa.blogserver.global.response.SuccessCode;
+import baekgwa.blogserver.integration.SpringBootTestSupporter;
+import baekgwa.blogserver.model.category.entity.CategoryEntity;
+import baekgwa.blogserver.model.post.post.entity.PostEntity;
+import baekgwa.blogserver.model.tag.entity.TagEntity;
+
+/**
+ * PackageName : baekgwa.blogserver.domain.stack.controller
+ * FileName    : StackControllerTest
+ * Author      : Baekgwa
+ * Date        : 2025-10-22
+ * Description : 
+ * =====================================================================================================================
+ * DATE          AUTHOR               NOTE
+ * ---------------------------------------------------------------------------------------------------------------------
+ * 2025-10-22     Baekgwa               Initial creation
+ */
+@Transactional
+class StackControllerTest extends SpringBootTestSupporter {
+
+	@WithMockUser
+	@DisplayName("신규 스택 등록")
+	@Test
+	void createNewStack1() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
+		StackRequest.NewStackSeries request =
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+
+		// when
+		ResultActions perform = mockMvc.perform(post("/stack")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.CREATE_STACK_SUCCESS.getMessage()))
+			.andExpect(
+				jsonPath("$.code").value(String.valueOf(SuccessCode.CREATE_STACK_SUCCESS.getStatus().value())));
+	}
+
+	@DisplayName("신규 스택 등록은 로그인 한 회원만 가능합니다.")
+	@Test
+	void createNewStack2() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
+		StackRequest.NewStackSeries request =
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+
+		// when
+		ResultActions perform = mockMvc.perform(post("/stack")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.message").value(ErrorCode.NEED_LOGIN.getMessage()))
+			.andExpect(jsonPath("$.code").value(ErrorCode.NEED_LOGIN.getCode()))
+			.andExpect(jsonPath("$.data").isEmpty());
+	}
+}
