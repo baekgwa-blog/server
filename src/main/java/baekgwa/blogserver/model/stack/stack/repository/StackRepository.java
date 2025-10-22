@@ -16,4 +16,6 @@ import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
  * 2025-10-22     Baekgwa               Initial creation
  */
 public interface StackRepository extends JpaRepository<StackEntity, Long> {
+
+	boolean existsByTitle(String title);
 }

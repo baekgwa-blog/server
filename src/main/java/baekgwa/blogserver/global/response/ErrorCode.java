@@ -44,6 +44,9 @@ public enum ErrorCode {
 	INVALID_FILE(HttpStatus.BAD_REQUEST, "5000", "파일 업로드 실패. 잘못된 파일 입니다."),
 	FILE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "5001", "파일 업로드 실패, 재시도 혹은 관리자 문의해주세요."),
 
+	//Stack : 6000 ~ 6999
+	ALREADY_EXIST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6000", "이미 존재하는 스택 이름 입니다."),
+
 	//Common: 9000 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),
 	NOT_SUPPORTED_METHOD(HttpStatus.METHOD_NOT_ALLOWED, "9002", "요청 메서드를 찾을 수 없습니다."),
