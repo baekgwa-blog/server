@@ -20,6 +20,7 @@ import baekgwa.blogserver.global.response.SuccessCode;
 import baekgwa.blogserver.integration.SpringBootTestSupporter;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
+import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 
 /**
@@ -90,5 +91,35 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.message").value(ErrorCode.NEED_LOGIN.getMessage()))
 			.andExpect(jsonPath("$.code").value(ErrorCode.NEED_LOGIN.getCode()))
 			.andExpect(jsonPath("$.data").isEmpty());
+	}
+
+	@DisplayName("포스트와 관련된 스택 목록 확인 API")
+	@Test
+	void getRelativeStackPostInfo1() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		// when
+		PostEntity savePost = savePostList.getFirst();
+		ResultActions perform = mockMvc.perform(get("/stack/post/{postId}", savePost.getId()));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.FIND_RELATIVE_STACK_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.FIND_RELATIVE_STACK_SUCCESS.getStatus().value())))
+			.andExpect(jsonPath("$.data.stackId").isNumber())
+			.andExpect(jsonPath("$.data.title").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList").isArray())
+			.andExpect(jsonPath("$.data.stackPostInfoList.length()").value(2))
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].postId").isNumber())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].title").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].slug").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].sequence").isNumber());
 	}
 }

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import baekgwa.blogserver.domain.stack.dto.StackRequest;
+import baekgwa.blogserver.domain.stack.dto.StackResponse;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.integration.SpringBootTestSupporter;
@@ -68,7 +69,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
 		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
-		StackEntity saveStack = stackDataFactory.newStackList(1, saveCategory).getFirst();
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
 
 		AtomicLong al = new AtomicLong(0L);
 		List<StackRequest.StackPost> stackPostList =
@@ -151,7 +152,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
 		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
-		StackEntity saveStack = stackDataFactory.newStackList(1, saveCategory).getFirst();
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
 		stackDataFactory.newStackPost(saveStack, savePostList);
 
 		AtomicLong al = new AtomicLong(0L);
@@ -167,5 +168,66 @@ class StackServiceTest extends SpringBootTestSupporter {
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
+	}
+
+	@DisplayName("현재 입력받은 postId 가 포함된 스택(시리즈)의 목록을 조회합니다.")
+	@Test
+	void getRelativeStackPostInfo1() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		// when
+		StackResponse.StackInfo response = stackService.getRelativeStackPostInfo(savePostList.getFirst().getId());
+
+		// then
+		assertThat(response.getStackId()).isEqualTo(saveStack.getId());
+		assertThat(response.getTitle()).isEqualTo(saveStack.getTitle());
+		assertThat(response.getStackPostInfoList()).hasSize(2);
+
+		assertThat(response.getStackPostInfoList()).satisfiesExactly(
+			postInfo1 -> {
+				assertThat(postInfo1.getPostId()).isEqualTo(savePostList.getFirst().getId());
+				assertThat(postInfo1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
+				assertThat(postInfo1.getSlug()).isEqualTo(savePostList.getFirst().getSlug());
+				assertThat(postInfo1.getSequence()).isEqualTo(1L);
+			},
+			postInfo2 -> {
+				assertThat(postInfo2.getPostId()).isEqualTo(savePostList.get(1).getId());
+				assertThat(postInfo2.getTitle()).isEqualTo(savePostList.get(1).getTitle());
+				assertThat(postInfo2.getSlug()).isEqualTo(savePostList.get(1).getSlug());
+				assertThat(postInfo2.getSequence()).isEqualTo(2L);
+			}
+		);
+	}
+
+	@DisplayName("현재 입력받은 postId 가 포함된 스택(시리즈)의 목록을 조회합니다. 없다면 빈 응답입니다.")
+	@Test
+	void getRelativeStackPostInfo2() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+
+		// when
+		StackResponse.StackInfo response = stackService.getRelativeStackPostInfo(savePostList.getFirst().getId());
+
+		// then
+		assertThat(response).isNull();
+	}
+
+	@DisplayName("현재 입력받은 postId 가 포함된 스택(시리즈)의 목록을 조회합니다. 잘못된 글 id 라면 오류를 발생합니다.")
+	@Test
+	void getRelativeStackPostInfo3() {
+		// given
+
+		// when // then
+		assertThatThrownBy(() -> stackService.getRelativeStackPostInfo(1L))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.NOT_EXIST_POST);
 	}
 }

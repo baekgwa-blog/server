@@ -34,7 +34,7 @@ public class StackDataFactory {
 	private final StackPostRepository stackPostRepository;
 	private final EntityManager em;
 
-	public List<StackEntity> newStackList(final long count, final CategoryEntity category) {
+	public List<StackEntity> newStack(final long count, final CategoryEntity category) {
 
 		if (count <= 0) {
 			throw new IllegalArgumentException("1개 이상 입력되어야 합니다.");
