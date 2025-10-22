@@ -108,6 +108,11 @@ public class StackService {
 
 	@Transactional(readOnly = true)
 	public StackResponse.StackInfo getRelativeStackPostInfo(Long postId) {
+		// 1. Post id 유효성 검사
+		if(!postRepository.existsById(postId)) {
+			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
+		}
+
 		// 1. 연결된 Stack 조회
 		Optional<StackPostEntity> opFindStackPost = stackPostRepository.findByPostId(postId);
 
