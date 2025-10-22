@@ -1,5 +1,6 @@
 package baekgwa.blogserver.model.stack.post.entity;
 
+import baekgwa.blogserver.global.entity.TemporalEntity;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
 import jakarta.persistence.Column;
@@ -30,7 +31,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "stack_post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StackPostEntity {
+public class StackPostEntity extends TemporalEntity {
 
 	@Id
 	@Column(name = "id", nullable = false)
@@ -45,12 +46,16 @@ public class StackPostEntity {
 	@JoinColumn(name = "post_id")
 	private PostEntity post;
 
-	private StackPostEntity(StackEntity stack, PostEntity post) {
+	@Column(name = "sequence", nullable = false)
+	private Long sequence;
+
+	private StackPostEntity(StackEntity stack, PostEntity post, Long sequence) {
 		this.stack = stack;
 		this.post = post;
+		this.sequence = sequence;
 	}
 
-	public static StackPostEntity of(StackEntity stack, PostEntity post) {
-		return new StackPostEntity(stack, post);
+	public static StackPostEntity of(StackEntity stack, PostEntity post, Long sequence) {
+		return new StackPostEntity(stack, post, sequence);
 	}
 }

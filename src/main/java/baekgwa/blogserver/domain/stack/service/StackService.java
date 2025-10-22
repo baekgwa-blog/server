@@ -1,6 +1,8 @@
 package baekgwa.blogserver.domain.stack.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,16 @@ public class StackService {
 			throw new GlobalException(ErrorCode.ALREADY_EXIST_STACK_SERIES);
 		}
 
+		// 1-2. 작성 글의 Sequence(순서) 입력값 검증
+		validateCheckStackPostSequence(request.getStackPostList());
+
+		// 1-3. 포스팅 글 조회 및 유효성 검사
+		List<Long> postIdList = request.getStackPostList().stream().map(StackRequest.StackPost::getPostId).toList();
+		List<PostEntity> findPostEntity = postRepository.findAllById(postIdList);
+		if(findPostEntity.size() != postIdList.size()) {
+			throw new GlobalException(ErrorCode.INVALID_POST_LIST);
+		}
+
 		// 2. 카테고리 정보 조회
 		CategoryEntity findCategory = categoryRepository.findById(request.getCategoryId())
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_CATEGORY));
@@ -53,16 +65,40 @@ public class StackService {
 		StackEntity newStackSeries = StackEntity.of(request.getTitle(), request.getDescription(), findCategory);
 		StackEntity savedStackSeries = stackRepository.save(newStackSeries);
 
-		// 3. 포스팅 글 조회 및 유효성 검사
-		List<PostEntity> findPostEntity = postRepository.findAllById(request.getPostId());
-		if(findPostEntity.size() != request.getPostId().size()) {
-			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
-		}
+		// 3. 포스팅 글, 신규 스택에 등록
+		Map<Long, Long> postSequenceMap = request.getStackPostList()
+			.stream()
+			.collect(Collectors.toMap(StackRequest.StackPost::getPostId, StackRequest.StackPost::getSequence));
 
-		// 4. 포스팅 글, 신규 스택에 등록
 		List<StackPostEntity> newStackPost = findPostEntity.stream()
-			.map(data -> StackPostEntity.of(savedStackSeries, data))
+			.map(post -> StackPostEntity.of(savedStackSeries, post, postSequenceMap.get(post.getId())))
 			.toList();
 		stackPostRepository.saveAll(newStackPost);
+	}
+
+	private void validateCheckStackPostSequence(List<StackRequest.StackPost> stackPostList) {
+		// 1. stackPostList 가 비어있는지 확인
+		if (stackPostList == null || stackPostList.isEmpty()) {
+			throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);
+		}
+
+		// 2. Sequence 값들을 추출하여 리스트로 만듦
+		List<Long> sequenceList = stackPostList.stream()
+			.map(StackRequest.StackPost::getSequence)
+			.sorted()
+			.toList();
+
+		// 3. 중복된 Sequence 값이 있는지 확인
+		long distinctCount = sequenceList.stream().distinct().count();
+		if (distinctCount != sequenceList.size()) {
+			throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);
+		}
+
+		// 4. 1부터 시작하여 연속적인 값인지 확인
+		for (int i = 0; i < sequenceList.size(); i++) {
+			if (sequenceList.get(i) != i + 1) {
+				throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);
+			}
+		}
 	}
 }

@@ -2,6 +2,7 @@ package baekgwa.blogserver.domain.stack.dto;
 
 import java.util.List;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -41,10 +42,21 @@ public class StackRequest {
 		private String description;
 
 		@NotNull(message = "카테고리는 필수입니다.")
-		@Positive(message = "카테고리는 양수여야 합니다.")
+		@Positive(message = "유효하지 않은 카테고리 입니다.")
 		private Long categoryId;
 
-		@NotEmpty(message = "포스팅 글은 목록은 비어 있을 수 없습니다.")
-		private List<Long> postId;
+		@NotEmpty(message = "포스트 목록은 비어 있을 수 없습니다.")
+		private List<StackPost> stackPostList;
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PRIVATE)
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackPost {
+		@Positive(message = "유효하지 않은 포스트 글 입니다. postId(${validatedValue})")
+		private Long postId;
+		@Min(value = 1, message = "포스트 글 순서는 1이상이어야 합니다.")
+		private Long sequence;
 	}
 }
