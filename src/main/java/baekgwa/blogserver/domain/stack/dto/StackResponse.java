@@ -55,7 +55,7 @@ public class StackResponse {
 		public static StackPostInfo of(StackPostEntity stackPost) {
 			return StackPostInfo
 				.builder()
-				.postId(stackPost.getId())
+				.postId(stackPost.getPost().getId())
 				.title(stackPost.getPost().getTitle())
 				.slug(stackPost.getPost().getSlug())
 				.sequence(stackPost.getSequence())
