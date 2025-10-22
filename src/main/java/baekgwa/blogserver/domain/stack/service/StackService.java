@@ -55,10 +55,12 @@ public class StackService {
 
 		// 1-3. 해당 포스트 들이 이미, 시리즈에 할당되어있는지 검증.
 		// 하나의 포스트는 하나의 시리즈에만 들어갈 수 있음.
-		// todo :
+		List<Long> postIdList = request.getStackPostList().stream().map(StackRequest.StackPost::getPostId).toList();
+		if(stackPostRepository.existsByPostIdIn(postIdList)) {
+			throw new GlobalException(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
+		}
 
 		// 1-3. 포스팅 글 조회 및 유효성 검사
-		List<Long> postIdList = request.getStackPostList().stream().map(StackRequest.StackPost::getPostId).toList();
 		List<PostEntity> findPostEntity = postRepository.findAllById(postIdList);
 		if (findPostEntity.size() != postIdList.size()) {
 			throw new GlobalException(ErrorCode.INVALID_POST_LIST);

@@ -48,6 +48,7 @@ public enum ErrorCode {
 	ALREADY_EXIST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6000", "이미 존재하는 스택(시리즈) 입니다."),
 	INVALID_STACK_POST_SEQUENCE(HttpStatus.BAD_REQUEST, "6001", "포스팅 순서가 유효하지 않습니다. 1부터 N 까지 중복없이 지정되야 합니다."),
 	INVALID_POST_LIST(HttpStatus.BAD_REQUEST, "6002", "글을 찾을 수 없거나, 중복된 포스팅이 포함되었습니다. 입력값 오류"),
+	ALREADY_REGISTER_POST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6003", "이미 스택(시리즈)에 등록된 글이 존재합니다. 확인해주세요."),
 
 	//Common: 9000 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),

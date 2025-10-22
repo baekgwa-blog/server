@@ -143,4 +143,29 @@ class StackServiceTest extends SpringBootTestSupporter {
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.INVALID_POST_LIST);
 	}
+
+	@DisplayName("이미 등록된 다른 스택에 등록된 포스트는 다른 스택에 등록할 수 없습니다.")
+	@Test
+	void createNewStackSeries6() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStackList(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream()
+				.map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet()))
+				.toList();
+		StackRequest.NewStackSeries request =
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+
+		// when // then
+		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
+	}
 }
