@@ -45,7 +45,7 @@ public enum ErrorCode {
 	FILE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "5001", "파일 업로드 실패, 재시도 혹은 관리자 문의해주세요."),
 
 	//Stack : 6000 ~ 6999
-	ALREADY_EXIST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6000", "이미 존재하는 스택 이름 입니다."),
+	ALREADY_EXIST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6000", "이미 존재하는 스택(시리즈) 입니다."),
 	INVALID_STACK_POST_SEQUENCE(HttpStatus.BAD_REQUEST, "6001", "포스팅 순서가 유효하지 않습니다. 1부터 N 까지 중복없이 지정되야 합니다."),
 	INVALID_POST_LIST(HttpStatus.BAD_REQUEST, "6002", "글을 찾을 수 없거나, 중복된 포스팅이 포함되었습니다. 입력값 오류"),
 

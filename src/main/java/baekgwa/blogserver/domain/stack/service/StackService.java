@@ -77,24 +77,19 @@ public class StackService {
 	}
 
 	private void validateCheckStackPostSequence(List<StackRequest.StackPost> stackPostList) {
-		// 1. stackPostList 가 비어있는지 확인
-		if (stackPostList == null || stackPostList.isEmpty()) {
-			throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);
-		}
-
-		// 2. Sequence 값들을 추출하여 리스트로 만듦
+		// 1. Sequence 값들을 추출하여 리스트로 만듦
 		List<Long> sequenceList = stackPostList.stream()
 			.map(StackRequest.StackPost::getSequence)
 			.sorted()
 			.toList();
 
-		// 3. 중복된 Sequence 값이 있는지 확인
+		// 2. 중복된 Sequence 값이 있는지 확인
 		long distinctCount = sequenceList.stream().distinct().count();
 		if (distinctCount != sequenceList.size()) {
 			throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);
 		}
 
-		// 4. 1부터 시작하여 연속적인 값인지 확인
+		// 3. 1부터 시작하여 연속적인 값인지 확인
 		for (int i = 0; i < sequenceList.size(); i++) {
 			if (sequenceList.get(i) != i + 1) {
 				throw new GlobalException(ErrorCode.INVALID_STACK_POST_SEQUENCE);

@@ -47,6 +47,17 @@ public class StackRequest {
 
 		@NotEmpty(message = "포스트 목록은 비어 있을 수 없습니다.")
 		private List<StackPost> stackPostList;
+
+		public static NewStackSeries of(String title, String description, Long categoryId,
+			List<StackPost> stackPostList) {
+			return NewStackSeries
+				.builder()
+				.title(title)
+				.description(description)
+				.categoryId(categoryId)
+				.stackPostList(stackPostList)
+				.build();
+		}
 	}
 
 	@Getter
@@ -54,9 +65,17 @@ public class StackRequest {
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackPost {
-		@Positive(message = "유효하지 않은 포스트 글 입니다. postId(${validatedValue})")
+		@Min(value = 1, message = "유효하지 않은 포스트 글 입니다. postId(${validatedValue})")
 		private Long postId;
 		@Min(value = 1, message = "포스트 글 순서는 1이상이어야 합니다.")
 		private Long sequence;
+
+		public static StackPost of(Long postId, Long sequence) {
+			return StackPost
+				.builder()
+				.postId(postId)
+				.sequence(sequence)
+				.build();
+		}
 	}
 }
