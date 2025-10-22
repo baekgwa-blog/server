@@ -27,12 +27,13 @@ CREATE TABLE `stack_post`
     `id`          BIGINT   NOT NULL AUTO_INCREMENT,
     `stack_id`    BIGINT   NOT NULL,
     `post_id`     BIGINT   NOT NULL,
-    `sequence`       BIGINT   NOT NULL,
+    `sequence`    BIGINT   NOT NULL,
     `created_at`  DATETIME NOT NULL,
     `modified_at` DATETIME NOT NULL,
     PRIMARY KEY `pk_stack_post_id` (`id`),
     FOREIGN KEY `fk_stack_post_stack_id` (`stack_id`) REFERENCES `stack` (`id`) ON DELETE CASCADE,
     FOREIGN KEY `fk_stack_post_post_id` (`post_id`) REFERENCES `post` (`id`),
     UNIQUE KEY `uk_stack_post_stack_id_post_id` (`stack_id`, `post_id`),
-    UNIQUE KEY `uk_stack_post_stack_id_order` (`stack_id`, `sequence`)
+    UNIQUE KEY `uk_stack_post_stack_id_order` (`stack_id`, `sequence`),
+    UNIQUE KEY `uk_stack_post_post_id_unique` (`post_id`)
 )

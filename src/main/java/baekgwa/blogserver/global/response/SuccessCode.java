@@ -42,6 +42,7 @@ public enum SuccessCode {
 
 	//스택 시리즈
 	CREATE_STACK_SUCCESS(HttpStatus.CREATED, "스택 생성 완료"),
+	FIND_RELATIVE_STACK_SUCCESS(HttpStatus.OK, "글 관련 스택 내용 조회 성공"),
 
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");

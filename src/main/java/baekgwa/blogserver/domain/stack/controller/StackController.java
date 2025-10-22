@@ -1,11 +1,14 @@
 package baekgwa.blogserver.domain.stack.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import baekgwa.blogserver.domain.stack.dto.StackRequest;
+import baekgwa.blogserver.domain.stack.dto.StackResponse;
 import baekgwa.blogserver.domain.stack.service.StackService;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
@@ -40,5 +43,14 @@ public class StackController {
 	) {
 		stackService.createNewStackSeries(request);
 		return BaseResponse.success(SuccessCode.CREATE_STACK_SUCCESS);
+	}
+
+	@GetMapping("/post/{postId}")
+	@Operation(summary = "포스트와 관련된 스택 목록 반환")
+	public BaseResponse<StackResponse.StackInfo> getRelativeStackPostInfo(
+		@PathVariable(value = "postId") Long postId
+	) {
+		StackResponse.StackInfo response = stackService.getRelativeStackPostInfo(postId);
+		return BaseResponse.success(SuccessCode.FIND_RELATIVE_STACK_SUCCESS, response);
 	}
 }
