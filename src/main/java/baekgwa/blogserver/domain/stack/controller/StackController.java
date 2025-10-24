@@ -1,5 +1,7 @@
 package baekgwa.blogserver.domain.stack.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +45,13 @@ public class StackController {
 	) {
 		stackService.createNewStackSeries(request);
 		return BaseResponse.success(SuccessCode.CREATE_STACK_SUCCESS);
+	}
+
+	@GetMapping
+	@Operation(summary = "스택 목록 조회")
+	public BaseResponse<List<StackResponse.StackDetailInfo>> getAllStack() {
+		List<StackResponse.StackDetailInfo> response = stackService.getAllStack();
+		return BaseResponse.success(SuccessCode.GET_ALL_STACK_SUCCESS, response);
 	}
 
 	@GetMapping("/post/{postId}")

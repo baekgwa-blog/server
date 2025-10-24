@@ -31,4 +31,7 @@ public interface StackPostRepository extends JpaRepository<StackPostEntity, Long
 
 	@Query("SELECT COUNT(sp) > 0 FROM StackPostEntity sp WHERE sp.post.id IN :postIdList")
 	boolean existsByPostIdIn(@Param("postIdList") List<Long> postIdList);
+
+	@Query("SELECT sp FROM StackPostEntity sp JOIN FETCH sp.stack s JOIN FETCH sp.post p")
+	List<StackPostEntity> findAllWithStackAndPost();
 }

@@ -1,5 +1,6 @@
 package baekgwa.blogserver.domain.stack.service;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class StackService {
 		// 1-3. 해당 포스트 들이 이미, 시리즈에 할당되어있는지 검증.
 		// 하나의 포스트는 하나의 시리즈에만 들어갈 수 있음.
 		List<Long> postIdList = request.getStackPostList().stream().map(StackRequest.StackPost::getPostId).toList();
-		if(stackPostRepository.existsByPostIdIn(postIdList)) {
+		if (stackPostRepository.existsByPostIdIn(postIdList)) {
 			throw new GlobalException(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
 		}
 
@@ -111,7 +112,7 @@ public class StackService {
 	@Transactional(readOnly = true)
 	public StackResponse.StackInfo getRelativeStackPostInfo(Long postId) {
 		// 1. Post id 유효성 검사
-		if(!postRepository.existsById(postId)) {
+		if (!postRepository.existsById(postId)) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
 		}
 
@@ -135,5 +136,34 @@ public class StackService {
 			.toList();
 
 		return StackResponse.StackInfo.of(findStack, stackPostInfoList);
+	}
+
+	@Transactional(readOnly = true)
+	public List<StackResponse.StackDetailInfo> getAllStack() {
+		// 1. Stack 정보 모두 조회
+		List<StackEntity> findStackList = stackRepository.findAll();
+
+		// 2. Stack 과 관련된 포스트 모두 조회
+		List<StackPostEntity> findStackPost = stackPostRepository.findAllWithStackAndPost();
+		Map<Long, List<StackResponse.StackPostInfo>> findStackPostInfoMap =
+			findStackPost.stream()
+				.collect(Collectors.groupingBy(
+					stackPost -> stackPost.getStack().getId(),
+					Collectors.mapping(
+						StackResponse.StackPostInfo::of,
+						Collectors.toList()
+					)
+				));
+
+		// 3. dto return
+		return findStackList.stream()
+			.map(stack -> {
+				List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostInfoMap.getOrDefault(
+					stack.getId(),
+					Collections.emptyList()
+				);
+				return StackResponse.StackDetailInfo.of(stack, stackPostInfoList);
+			})
+			.toList();
 	}
 }
