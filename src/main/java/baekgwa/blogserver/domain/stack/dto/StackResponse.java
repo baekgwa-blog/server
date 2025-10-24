@@ -31,7 +31,7 @@ public class StackResponse {
 	public static class StackInfo {
 		private final Long stackId;
 		private final String title;
-		private List<StackPostInfo> stackPostInfoList;
+		private final List<StackPostInfo> stackPostInfoList;
 
 		public static StackInfo of(StackEntity stack, List<StackPostInfo> stackPostInfoList) {
 			return StackInfo

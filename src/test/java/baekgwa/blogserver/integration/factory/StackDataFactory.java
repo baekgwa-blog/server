@@ -45,7 +45,8 @@ public class StackDataFactory {
 			StackEntity newStack = StackEntity.of(
 				String.format("%s%d", "title", index),
 				String.format("%s%d", "description", index),
-				category);
+				category,
+				null);
 
 			stackList.add(newStack);
 		}

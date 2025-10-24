@@ -49,19 +49,24 @@ public class StackEntity extends TemporalEntity {
 	@JoinColumn(name = "category_id")
 	private CategoryEntity category;
 
+	@Column(name = "thumbnail_image", nullable = true, columnDefinition = "TEXT")
+	private String thumbnailImage;
+
 	@Builder(access = AccessLevel.PRIVATE)
-	private StackEntity(String title, String description, CategoryEntity category) {
+	private StackEntity(String title, String description, CategoryEntity category, String thumbnailImage) {
 		this.title = title;
 		this.description = description;
 		this.category = category;
+		this.thumbnailImage = thumbnailImage;
 	}
 
-	public static StackEntity of(String title, String description, CategoryEntity category) {
+	public static StackEntity of(String title, String description, CategoryEntity category, String thumbnailImage) {
 		return StackEntity
 			.builder()
 			.title(title)
 			.description(description)
 			.category(category)
+			.thumbnailImage(thumbnailImage)
 			.build();
 	}
 }

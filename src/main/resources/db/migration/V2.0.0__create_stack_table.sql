@@ -11,12 +11,13 @@
 
 CREATE TABLE `stack`
 (
-    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
-    `title`       VARCHAR(255) NOT NULL,
-    `description` VARCHAR(255) NOT NULL,
-    `category_id` BIGINT       NOT NULL,
-    `created_at`  DATETIME     NOT NULL,
-    `modified_at` DATETIME     NOT NULL,
+    `id`              BIGINT       NOT NULL AUTO_INCREMENT,
+    `title`           VARCHAR(255) NOT NULL,
+    `description`     VARCHAR(255) NOT NULL,
+    `category_id`     BIGINT       NOT NULL,
+    `thumbnail_image` text         NULL,
+    `created_at`      DATETIME     NOT NULL,
+    `modified_at`     DATETIME     NOT NULL,
     PRIMARY KEY `pk_stack_id` (`id`),
     FOREIGN KEY `fk_stack_category_id` (`category_id`) REFERENCES `category` (`id`),
     UNIQUE KEY `uk_stack_title` (`title`)

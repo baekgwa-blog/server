@@ -45,7 +45,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when
 		stackService.createNewStackSeries(request);
@@ -75,7 +75,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of(saveStack.getTitle(), "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of(saveStack.getTitle(), "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
@@ -94,7 +94,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), 1L)).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
@@ -114,7 +114,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
@@ -136,7 +136,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 				.map(post -> StackRequest.StackPost.of(post.getId() + 1L, al.incrementAndGet()))
 				.toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
@@ -161,7 +161,7 @@ class StackServiceTest extends SpringBootTestSupporter {
 				.map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet()))
 				.toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))

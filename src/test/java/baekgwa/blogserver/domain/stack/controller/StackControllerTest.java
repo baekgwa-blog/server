@@ -49,7 +49,7 @@ class StackControllerTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/stack")
@@ -77,7 +77,7 @@ class StackControllerTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList);
+			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/stack")

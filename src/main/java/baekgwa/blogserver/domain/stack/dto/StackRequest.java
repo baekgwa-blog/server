@@ -45,17 +45,20 @@ public class StackRequest {
 		@Positive(message = "유효하지 않은 카테고리 입니다.")
 		private Long categoryId;
 
+		private String thumbnailImage;
+
 		@NotEmpty(message = "포스트 목록은 비어 있을 수 없습니다.")
 		private List<StackPost> stackPostList;
 
 		public static NewStackSeries of(String title, String description, Long categoryId,
-			List<StackPost> stackPostList) {
+			List<StackPost> stackPostList, String thumbnailImage) {
 			return NewStackSeries
 				.builder()
 				.title(title)
 				.description(description)
 				.categoryId(categoryId)
 				.stackPostList(stackPostList)
+				.thumbnailImage(thumbnailImage)
 				.build();
 		}
 	}

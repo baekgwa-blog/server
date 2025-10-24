@@ -71,8 +71,10 @@ public class StackService {
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_CATEGORY));
 
 		// 2. 신규 스택 등록
-		StackEntity newStackSeries = StackEntity.of(request.getTitle(), request.getDescription(), findCategory);
-		StackEntity savedStackSeries = stackRepository.save(newStackSeries);
+		StackEntity newStackSeries =
+			StackEntity.of(request.getTitle(), request.getDescription(), findCategory, request.getThumbnailImage());
+		StackEntity savedStackSeries =
+			stackRepository.save(newStackSeries);
 
 		// 3. 포스팅 글, 신규 스택에 등록
 		Map<Long, Long> postSequenceMap = request.getStackPostList()
