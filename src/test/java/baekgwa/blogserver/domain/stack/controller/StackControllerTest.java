@@ -122,4 +122,40 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.stackPostInfoList[0].slug").isNotEmpty())
 			.andExpect(jsonPath("$.data.stackPostInfoList[0].sequence").isNumber());
 	}
+
+	@DisplayName("저장된 모든 Stack 정보를 조회합니다.")
+	@Test
+	void getAllStack1() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(4, saveTagList, saveCategory);
+		List<StackEntity> saveStackList = stackDataFactory.newStack(2, saveCategory);
+		stackDataFactory.newStackPost(saveStackList.getFirst(), List.of(savePostList.getFirst(), savePostList.get(1)));
+		stackDataFactory.newStackPost(saveStackList.getLast(), List.of(savePostList.get(2), savePostList.getLast()));
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/stack"));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.GET_ALL_STACK_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.GET_ALL_STACK_SUCCESS.getStatus().value())))
+			.andExpect(jsonPath("$.data").isArray())
+			.andExpect(jsonPath("$.data.length()").value(2))
+			.andExpect(jsonPath("$.data[0].stackId").isNumber())
+			.andExpect(jsonPath("$.data[0].title").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].stackPostInfoList").isArray())
+			.andExpect(jsonPath("$.data[0].stackPostInfoList.length()").value(2))
+			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].postId").isNumber())
+			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].title").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].slug").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].sequence").isNumber())
+			.andExpect(jsonPath("$.data[1].stackId").isNumber())
+			.andExpect(jsonPath("$.data[1].title").isNotEmpty())
+			.andExpect(jsonPath("$.data[1].stackPostInfoList").isArray())
+			.andExpect(jsonPath("$.data[1].stackPostInfoList.length()").value(2));
+	}
 }

@@ -230,4 +230,81 @@ class StackServiceTest extends SpringBootTestSupporter {
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_POST);
 	}
+
+	@DisplayName("현재 등록된 모든 스택(시리즈)의 정보를 return 합니다.")
+	@Test
+	void getAllStack1() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(4, saveTagList, saveCategory);
+		List<StackEntity> saveStackList = stackDataFactory.newStack(2, saveCategory);
+		stackDataFactory.newStackPost(saveStackList.getFirst(), List.of(savePostList.getFirst(), savePostList.get(1)));
+		stackDataFactory.newStackPost(saveStackList.getLast(), List.of(savePostList.get(2), savePostList.getLast()));
+
+		// when
+		List<StackResponse.StackDetailInfo> response = stackService.getAllStack();
+
+		// then
+		assertThat(response).hasSize(2).satisfiesExactly(
+			stack1 -> {
+				assertThat(stack1.getStackId()).isEqualTo(saveStackList.getFirst().getId());
+				assertThat(stack1.getTitle()).isEqualTo(saveStackList.getFirst().getTitle());
+				assertThat(stack1.getDescription()).isEqualTo(saveStackList.getFirst().getDescription());
+				assertThat(stack1.getCategory()).isEqualTo(saveStackList.getFirst().getCategory().getName());
+				assertThat(stack1.getThumbnailImage()).isEqualTo(saveStackList.getFirst().getThumbnailImage());
+				assertThat(stack1.getStackPostInfoList()).hasSize(2).satisfiesExactly(
+					postInfo1 -> {
+						assertThat(postInfo1.getPostId()).isEqualTo(savePostList.getFirst().getId());
+						assertThat(postInfo1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
+						assertThat(postInfo1.getSlug()).isEqualTo(savePostList.getFirst().getSlug());
+						assertThat(postInfo1.getSequence()).isPositive().isNotZero();
+						assertThat(postInfo1.getViewCount()).isEqualTo(savePostList.getFirst().getViewCount());
+					},
+					postInfo2 -> {
+						assertThat(postInfo2.getPostId()).isEqualTo(savePostList.get(1).getId());
+						assertThat(postInfo2.getTitle()).isEqualTo(savePostList.get(1).getTitle());
+						assertThat(postInfo2.getSlug()).isEqualTo(savePostList.get(1).getSlug());
+						assertThat(postInfo2.getSequence()).isPositive().isNotZero();
+						assertThat(postInfo2.getViewCount()).isEqualTo(savePostList.get(1).getViewCount());
+					}
+				);
+			},
+			stack2 -> {
+				assertThat(stack2.getStackId()).isEqualTo(saveStackList.getLast().getId());
+				assertThat(stack2.getTitle()).isEqualTo(saveStackList.getLast().getTitle());
+				assertThat(stack2.getDescription()).isEqualTo(saveStackList.getLast().getDescription());
+				assertThat(stack2.getCategory()).isEqualTo(saveStackList.getLast().getCategory().getName());
+				assertThat(stack2.getThumbnailImage()).isEqualTo(saveStackList.getLast().getThumbnailImage());
+				assertThat(stack2.getStackPostInfoList()).hasSize(2).satisfiesExactly(
+					postInfo1 -> {
+						assertThat(postInfo1.getPostId()).isEqualTo(savePostList.get(2).getId());
+						assertThat(postInfo1.getTitle()).isEqualTo(savePostList.get(2).getTitle());
+						assertThat(postInfo1.getSlug()).isEqualTo(savePostList.get(2).getSlug());
+						assertThat(postInfo1.getSequence()).isPositive().isNotZero();
+						assertThat(postInfo1.getViewCount()).isEqualTo(savePostList.get(2).getViewCount());
+					},
+					postInfo2 -> {
+						assertThat(postInfo2.getPostId()).isEqualTo(savePostList.get(3).getId());
+						assertThat(postInfo2.getTitle()).isEqualTo(savePostList.get(3).getTitle());
+						assertThat(postInfo2.getSlug()).isEqualTo(savePostList.get(3).getSlug());
+						assertThat(postInfo2.getSequence()).isPositive().isNotZero();
+						assertThat(postInfo2.getViewCount()).isEqualTo(savePostList.get(3).getViewCount());
+					}
+				);
+			}
+		);
+	}
+
+	@DisplayName("현재 등록된 모든 스택(시리즈)의 정보를 return 합니다. 없으면 빈 배열이 반환됩니다.")
+	@Test
+	void getAllStack2() {
+		// given
+
+		// when
+		List<StackResponse.StackDetailInfo> response = stackService.getAllStack();
+
+		// then
+		assertThat(response).isEmpty();
+	}
 }
