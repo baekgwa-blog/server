@@ -148,6 +148,8 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data[0].stackId").isNumber())
 			.andExpect(jsonPath("$.data[0].title").isNotEmpty())
 			.andExpect(jsonPath("$.data[0].description").isNotEmpty())
-			.andExpect(jsonPath("$.data[0].category").isNotEmpty());
+			.andExpect(jsonPath("$.data[0].category").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].updatedAt").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].count").isNumber());
 	}
 }
