@@ -147,15 +147,7 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.length()").value(2))
 			.andExpect(jsonPath("$.data[0].stackId").isNumber())
 			.andExpect(jsonPath("$.data[0].title").isNotEmpty())
-			.andExpect(jsonPath("$.data[0].stackPostInfoList").isArray())
-			.andExpect(jsonPath("$.data[0].stackPostInfoList.length()").value(2))
-			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].postId").isNumber())
-			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].title").isNotEmpty())
-			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].slug").isNotEmpty())
-			.andExpect(jsonPath("$.data[0].stackPostInfoList[0].sequence").isNumber())
-			.andExpect(jsonPath("$.data[1].stackId").isNumber())
-			.andExpect(jsonPath("$.data[1].title").isNotEmpty())
-			.andExpect(jsonPath("$.data[1].stackPostInfoList").isArray())
-			.andExpect(jsonPath("$.data[1].stackPostInfoList.length()").value(2));
+			.andExpect(jsonPath("$.data[0].description").isNotEmpty())
+			.andExpect(jsonPath("$.data[0].category").isNotEmpty());
 	}
 }

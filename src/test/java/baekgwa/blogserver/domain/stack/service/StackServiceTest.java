@@ -253,22 +253,6 @@ class StackServiceTest extends SpringBootTestSupporter {
 				assertThat(stack1.getDescription()).isEqualTo(saveStackList.getFirst().getDescription());
 				assertThat(stack1.getCategory()).isEqualTo(saveStackList.getFirst().getCategory().getName());
 				assertThat(stack1.getThumbnailImage()).isEqualTo(saveStackList.getFirst().getThumbnailImage());
-				assertThat(stack1.getStackPostInfoList()).hasSize(2).satisfiesExactly(
-					postInfo1 -> {
-						assertThat(postInfo1.getPostId()).isEqualTo(savePostList.getFirst().getId());
-						assertThat(postInfo1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
-						assertThat(postInfo1.getSlug()).isEqualTo(savePostList.getFirst().getSlug());
-						assertThat(postInfo1.getSequence()).isPositive().isNotZero();
-						assertThat(postInfo1.getViewCount()).isEqualTo(savePostList.getFirst().getViewCount());
-					},
-					postInfo2 -> {
-						assertThat(postInfo2.getPostId()).isEqualTo(savePostList.get(1).getId());
-						assertThat(postInfo2.getTitle()).isEqualTo(savePostList.get(1).getTitle());
-						assertThat(postInfo2.getSlug()).isEqualTo(savePostList.get(1).getSlug());
-						assertThat(postInfo2.getSequence()).isPositive().isNotZero();
-						assertThat(postInfo2.getViewCount()).isEqualTo(savePostList.get(1).getViewCount());
-					}
-				);
 			},
 			stack2 -> {
 				assertThat(stack2.getStackId()).isEqualTo(saveStackList.getLast().getId());
@@ -276,22 +260,6 @@ class StackServiceTest extends SpringBootTestSupporter {
 				assertThat(stack2.getDescription()).isEqualTo(saveStackList.getLast().getDescription());
 				assertThat(stack2.getCategory()).isEqualTo(saveStackList.getLast().getCategory().getName());
 				assertThat(stack2.getThumbnailImage()).isEqualTo(saveStackList.getLast().getThumbnailImage());
-				assertThat(stack2.getStackPostInfoList()).hasSize(2).satisfiesExactly(
-					postInfo1 -> {
-						assertThat(postInfo1.getPostId()).isEqualTo(savePostList.get(2).getId());
-						assertThat(postInfo1.getTitle()).isEqualTo(savePostList.get(2).getTitle());
-						assertThat(postInfo1.getSlug()).isEqualTo(savePostList.get(2).getSlug());
-						assertThat(postInfo1.getSequence()).isPositive().isNotZero();
-						assertThat(postInfo1.getViewCount()).isEqualTo(savePostList.get(2).getViewCount());
-					},
-					postInfo2 -> {
-						assertThat(postInfo2.getPostId()).isEqualTo(savePostList.get(3).getId());
-						assertThat(postInfo2.getTitle()).isEqualTo(savePostList.get(3).getTitle());
-						assertThat(postInfo2.getSlug()).isEqualTo(savePostList.get(3).getSlug());
-						assertThat(postInfo2.getSequence()).isPositive().isNotZero();
-						assertThat(postInfo2.getViewCount()).isEqualTo(savePostList.get(3).getViewCount());
-					}
-				);
 			}
 		);
 	}

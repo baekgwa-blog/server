@@ -1,6 +1,5 @@
 package baekgwa.blogserver.domain.stack.service;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -143,27 +142,7 @@ public class StackService {
 		// 1. Stack 정보 모두 조회
 		List<StackEntity> findStackList = stackRepository.findAll();
 
-		// 2. Stack 과 관련된 포스트 모두 조회
-		List<StackPostEntity> findStackPost = stackPostRepository.findAllWithStackAndPost();
-		Map<Long, List<StackResponse.StackPostInfo>> findStackPostInfoMap =
-			findStackPost.stream()
-				.collect(Collectors.groupingBy(
-					stackPost -> stackPost.getStack().getId(),
-					Collectors.mapping(
-						StackResponse.StackPostInfo::of,
-						Collectors.toList()
-					)
-				));
-
-		// 3. dto return
-		return findStackList.stream()
-			.map(stack -> {
-				List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostInfoMap.getOrDefault(
-					stack.getId(),
-					Collections.emptyList()
-				);
-				return StackResponse.StackDetailInfo.of(stack, stackPostInfoList);
-			})
-			.toList();
+		// 2. dto return
+		return findStackList.stream().map(StackResponse.StackDetailInfo::of).toList();
 	}
 }
