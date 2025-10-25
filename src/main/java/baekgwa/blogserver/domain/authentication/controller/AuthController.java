@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import baekgwa.blogserver.domain.authentication.dto.AuthRequest;
 import baekgwa.blogserver.domain.authentication.dto.AuthResponse;
 import baekgwa.blogserver.domain.authentication.service.AuthService;
+import baekgwa.blogserver.global.environment.AuthProperties;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
 	private final AuthService authService;
+	private final AuthProperties authProperties;
 
 	@PostMapping("/login")
 	@Operation(summary = "로그인")
@@ -51,6 +53,7 @@ public class AuthController {
 		Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_KEY, authResponseLogin.getAccessToken());
 		accessTokenCookie.setHttpOnly(true);
 		accessTokenCookie.setPath("/");
+		accessTokenCookie.setMaxAge(authProperties.getTokenExpiration().intValue());
 		// accessTokenCookie.setSecure(true); // prod에서만
 		response.addCookie(accessTokenCookie);
 
