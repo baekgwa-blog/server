@@ -94,6 +94,7 @@ public class SecurityConfig {
 				// Stack
 				.requestMatchers(GET, "/stack/post/{postId}").permitAll()
 				.requestMatchers(GET, "/stack").permitAll()
+				.requestMatchers(GET, "/stack/{postId}").permitAll()
 
 				.anyRequest().authenticated());
 

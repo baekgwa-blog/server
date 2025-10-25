@@ -62,4 +62,13 @@ public class StackController {
 		StackResponse.StackInfo response = stackService.getRelativeStackPostInfo(postId);
 		return BaseResponse.success(SuccessCode.FIND_RELATIVE_STACK_SUCCESS, response);
 	}
+
+	@GetMapping("/{stackId}")
+	@Operation(summary = "스택 상세 조회")
+	public BaseResponse<StackResponse.StackDetail> getStackDetail(
+		@PathVariable(value = "stackId") Long stackId
+	) {
+		StackResponse.StackDetail response = stackService.getStackDetail(stackId);
+		return BaseResponse.success(SuccessCode.GET_STACK_DETAIL_SUCCESS, response);
+	}
 }

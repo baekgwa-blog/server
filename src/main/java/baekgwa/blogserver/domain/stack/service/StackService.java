@@ -152,4 +152,20 @@ public class StackService {
 			))
 			.toList();
 	}
+
+	@Transactional(readOnly = true)
+	public StackResponse.StackDetail getStackDetail(Long stackId) {
+		// 1. 스택 조회
+		StackEntity findStack = stackRepository.findById(stackId).orElseThrow(
+			() -> new GlobalException(ErrorCode.NOTFOUND_STACK));
+
+		// 2. 스택에 할당된 글목록 조회
+		List<StackPostEntity> findStackPostList = stackPostRepository.findAllByStack(findStack);
+		List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostList.stream()
+			.map(StackResponse.StackPostInfo::of)
+			.toList();
+
+		// 3. dto return
+		return StackResponse.StackDetail.of(findStack, stackPostInfoList);
+	}
 }

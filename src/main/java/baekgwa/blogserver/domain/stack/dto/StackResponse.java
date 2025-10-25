@@ -72,12 +72,38 @@ public class StackResponse {
 	@Getter
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackDetail {
+		private final Long stackId;
+		private final String title;
+		private final String description;
+		private final String category;
+		private final String thumbnailImage;
+		private final List<StackPostInfo> stackPostInfoList;
+
+		public static StackDetail of(StackEntity stack, List<StackPostInfo> stackPostInfoList) {
+			return StackDetail
+				.builder()
+				.stackId(stack.getId())
+				.title(stack.getTitle())
+				.description(stack.getDescription())
+				.category(stack.getCategory().getName())
+				.thumbnailImage(stack.getThumbnailImage())
+				.stackPostInfoList(stackPostInfoList)
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackPostInfo {
 		private final Long postId;
 		private final String title;
+		private final String description;
 		private final String slug;
 		private final Long sequence;
 		private final Integer viewCount;
+		private final String thumbnailImage;
 		private final LocalDateTime createdAt;
 		private final LocalDateTime modifiedAt;
 
@@ -86,11 +112,13 @@ public class StackResponse {
 				.builder()
 				.postId(stackPost.getPost().getId())
 				.title(stackPost.getPost().getTitle())
+				.description(stackPost.getPost().getDescription())
 				.slug(stackPost.getPost().getSlug())
 				.sequence(stackPost.getSequence())
 				.viewCount(stackPost.getPost().getViewCount())
 				.createdAt(stackPost.getCreatedAt())
 				.modifiedAt(stackPost.getModifiedAt())
+				.thumbnailImage(stackPost.getPost().getThumbnailImage())
 				.build();
 		}
 	}
