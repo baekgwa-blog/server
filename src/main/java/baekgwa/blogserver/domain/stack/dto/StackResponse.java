@@ -52,9 +52,10 @@ public class StackResponse {
 		private final String description;
 		private final String category;
 		private final String thumbnailImage;
-		private final LocalDateTime createdAt;
+		private final LocalDateTime updatedAt;
+		private final Long count;
 
-		public static StackDetailInfo of(StackEntity stack) {
+		public static StackDetailInfo of(StackEntity stack, Long postCount, LocalDateTime updatedAt) {
 			return StackDetailInfo
 				.builder()
 				.stackId(stack.getId())
@@ -62,7 +63,8 @@ public class StackResponse {
 				.description(stack.getDescription())
 				.category(stack.getCategory().getName())
 				.thumbnailImage(stack.getThumbnailImage())
-				.createdAt(stack.getCreatedAt())
+				.updatedAt(updatedAt)
+				.count(postCount)
 				.build();
 		}
 	}

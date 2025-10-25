@@ -19,6 +19,7 @@ import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.stack.post.entity.StackPostEntity;
 import baekgwa.blogserver.model.stack.post.repository.StackPostRepository;
+import baekgwa.blogserver.model.stack.stack.dto.StackStatsDto;
 import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
 import baekgwa.blogserver.model.stack.stack.repository.StackRepository;
 import lombok.RequiredArgsConstructor;
@@ -139,10 +140,16 @@ public class StackService {
 
 	@Transactional(readOnly = true)
 	public List<StackResponse.StackDetailInfo> getAllStack() {
-		// 1. Stack 정보 모두 조회
-		List<StackEntity> findStackList = stackRepository.findAll();
+		// 1. Stack 과 관련된 Post 의 각각 수량과 가장 마지막에 Updated 된 정보 확인
+		List<StackStatsDto> findStackStatsList = stackRepository.findStackStats();
 
 		// 2. dto return
-		return findStackList.stream().map(StackResponse.StackDetailInfo::of).toList();
+		return findStackStatsList.stream()
+			.map(stat -> StackResponse.StackDetailInfo.of(
+				stat.getStack(),
+				stat.getPostCount(),
+				stat.getLastUpdate()
+			))
+			.toList();
 	}
 }
