@@ -152,4 +152,36 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data[0].updatedAt").isNotEmpty())
 			.andExpect(jsonPath("$.data[0].count").isNumber());
 	}
+
+	@DisplayName("특정 스택의 정보와 할당된 포스트들을 조회합니다.")
+	@Test
+	void getStackDetail() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/stack/{stackId}", saveStack.getId()));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.GET_STACK_DETAIL_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.GET_STACK_DETAIL_SUCCESS.getStatus().value())))
+			.andExpect(jsonPath("$.data.stackId").isNumber())
+			.andExpect(jsonPath("$.data.title").isNotEmpty())
+			.andExpect(jsonPath("$.data.description").isNotEmpty())
+			.andExpect(jsonPath("$.data.category").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList").isArray())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].postId").isNumber())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].title").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].description").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].slug").isNotEmpty())
+			.andExpect(jsonPath("$.data.stackPostInfoList[0].viewCount").isNumber())
+		;
+	}
 }

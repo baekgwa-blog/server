@@ -277,4 +277,53 @@ class StackServiceTest extends SpringBootTestSupporter {
 		// then
 		assertThat(response).isEmpty();
 	}
+
+	@DisplayName("특정 스택의 정보와 할당된 포스트들을 조회합니다.")
+	@Test
+	void getStackDetail1() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		// when
+		StackResponse.StackDetail stackDetail = stackService.getStackDetail(saveStack.getId());
+
+		// then
+		assertThat(stackDetail.getStackId()).isEqualTo(saveStack.getId());
+		assertThat(stackDetail.getTitle()).isEqualTo(saveStack.getTitle());
+		assertThat(stackDetail.getDescription()).isEqualTo(saveStack.getDescription());
+		assertThat(stackDetail.getCategory()).isEqualTo(saveStack.getCategory().getName());
+		assertThat(stackDetail.getThumbnailImage()).isEqualTo(saveStack.getThumbnailImage());
+		assertThat(stackDetail.getStackPostInfoList()).hasSize(2).satisfiesExactly(
+			post1-> {
+				assertThat(post1.getPostId()).isEqualTo(savePostList.getFirst().getId());
+				assertThat(post1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
+				assertThat(post1.getDescription()).isEqualTo(savePostList.getFirst().getDescription());
+				assertThat(post1.getSlug()).isEqualTo(savePostList.getFirst().getSlug());
+				assertThat(post1.getThumbnailImage()).isEqualTo(savePostList.getFirst().getThumbnailImage());
+			},
+			post2-> {
+				assertThat(post2.getPostId()).isEqualTo(savePostList.get(1).getId());
+				assertThat(post2.getTitle()).isEqualTo(savePostList.get(1).getTitle());
+				assertThat(post2.getDescription()).isEqualTo(savePostList.get(1).getDescription());
+				assertThat(post2.getSlug()).isEqualTo(savePostList.get(1).getSlug());
+				assertThat(post2.getThumbnailImage()).isEqualTo(savePostList.get(1).getThumbnailImage());
+			}
+		);
+	}
+
+	@DisplayName("특정 스택의 정보와 할당된 포스트들을 조회합니다. 없는 스택을 조회하면 예외를 바생시킵니다.")
+	@Test
+	void getStackDetail2() {
+		// given
+
+		// when // then
+		assertThatThrownBy(() -> stackService.getStackDetail(1L))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.NOTFOUND_STACK);
+	}
 }
