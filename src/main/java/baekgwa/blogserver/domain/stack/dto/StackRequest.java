@@ -67,6 +67,36 @@ public class StackRequest {
 	@Builder(access = AccessLevel.PRIVATE)
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class ModifyStackSeries {
+		@NotBlank(message = "제목은 필수 입력 항목입니다.")
+		@Size(max = 255, message = "제목은 최대 255자까지 입력 가능합니다.")
+		private String title;
+
+		@NotBlank(message = "설명은 필수 입력 항목입니다.")
+		@Size(max = 255, message = "설명은 최대 255자까지 입력 가능합니다.")
+		private String description;
+
+		private String thumbnailImage;
+
+		@NotEmpty(message = "포스트 목록은 비어 있을 수 없습니다.")
+		private List<StackPost> stackPostList;
+
+		public static ModifyStackSeries of(String title, String description,
+			List<StackPost> stackPostList, String thumbnailImage) {
+			return ModifyStackSeries
+				.builder()
+				.title(title)
+				.description(description)
+				.stackPostList(stackPostList)
+				.thumbnailImage(thumbnailImage)
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PRIVATE)
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackPost {
 		@Min(value = 1, message = "유효하지 않은 포스트 글 입니다. postId(${validatedValue})")
 		private Long postId;

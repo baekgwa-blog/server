@@ -45,7 +45,7 @@ public class StackService {
 	private final PostRepository postRepository;
 
 	@Transactional
-	public void createNewStackSeries(StackRequest.NewStackSeries request) {
+	public StackResponse.CreateNewStack createNewStackSeries(StackRequest.NewStackSeries request) {
 		// 1. 입력값 유효성 검증
 		if (stackRepository.existsByTitle(request.getTitle())) {
 			throw new GlobalException(ErrorCode.ALREADY_EXIST_STACK_SERIES);
@@ -86,6 +86,8 @@ public class StackService {
 			.map(post -> StackPostEntity.of(savedStackSeries, post, postSequenceMap.get(post.getId())))
 			.toList();
 		stackPostRepository.saveAll(newStackPost);
+
+		return new StackResponse.CreateNewStack(savedStackSeries.getId());
 	}
 
 	private void validateCheckStackPostSequence(List<StackRequest.StackPost> stackPostList) {
@@ -167,5 +169,45 @@ public class StackService {
 
 		// 3. dto return
 		return StackResponse.StackDetail.of(findStack, stackPostInfoList);
+	}
+
+	@Transactional
+	public StackResponse.ModifyStack modifyStackSeries(Long stackId, StackRequest.ModifyStackSeries request) {
+		// 1. 스택 정보 조회
+		StackEntity findStack = stackRepository.findById(stackId).orElseThrow(
+			() -> new GlobalException(ErrorCode.NOTFOUND_STACK));
+
+		// 2. 스택 정보 수정
+		findStack.modifyStack(request.getTitle(), request.getDescription(), request.getThumbnailImage());
+
+		// 3. 포스트 글 관련 내용 유효성 검증
+		validateCheckStackPostSequence(request.getStackPostList());
+
+		// 4. 기존 연관된 포스트 글 모두 삭제
+		stackPostRepository.deleteAllByStack(findStack);
+
+		// 5. 해당 포스트 들이 이미, 시리즈에 할당되어있는지 검증.
+		List<Long> postIdList = request.getStackPostList().stream().map(StackRequest.StackPost::getPostId).toList();
+		if (stackPostRepository.existsByPostIdIn(postIdList)) {
+			throw new GlobalException(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
+		}
+
+		// 6. 포스팅 글 조회 및 유효성 검사
+		List<PostEntity> findPostEntity = postRepository.findAllById(postIdList);
+		if (findPostEntity.size() != postIdList.size()) {
+			throw new GlobalException(ErrorCode.INVALID_POST_LIST);
+		}
+
+		// 7. 포스팅 글, 스택에 등록
+		Map<Long, Long> postSequenceMap = request.getStackPostList()
+			.stream()
+			.collect(Collectors.toMap(StackRequest.StackPost::getPostId, StackRequest.StackPost::getSequence));
+
+		List<StackPostEntity> newStackPost = findPostEntity.stream()
+			.map(post -> StackPostEntity.of(findStack, post, postSequenceMap.get(post.getId())))
+			.toList();
+		stackPostRepository.saveAll(newStackPost);
+
+		return new StackResponse.ModifyStack(findStack.getId());
 	}
 }

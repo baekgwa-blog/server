@@ -61,8 +61,9 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.isSuccess").value(true))
 			.andExpect(jsonPath("$.message").value(SuccessCode.CREATE_STACK_SUCCESS.getMessage()))
-			.andExpect(
-				jsonPath("$.code").value(String.valueOf(SuccessCode.CREATE_STACK_SUCCESS.getStatus().value())));
+			.andExpect(jsonPath("$.code")
+				.value(String.valueOf(SuccessCode.CREATE_STACK_SUCCESS.getStatus().value())))
+			.andExpect(jsonPath("$.data").isNotEmpty());
 	}
 
 	@DisplayName("신규 스택 등록은 로그인 한 회원만 가능합니다.")
@@ -183,5 +184,66 @@ class StackControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.stackPostInfoList[0].slug").isNotEmpty())
 			.andExpect(jsonPath("$.data.stackPostInfoList[0].viewCount").isNumber())
 		;
+	}
+
+	@WithMockUser
+	@DisplayName("등록된 스택을 수정합니다.")
+	@Test
+	void modifyStack1() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when
+		ResultActions perform = mockMvc.perform(put("/stack/{stackId}", saveStack.getId())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.MODIFY_STACK_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.code").value(String.valueOf(SuccessCode.MODIFY_STACK_SUCCESS.getStatus().value())))
+			.andExpect(jsonPath("$.data").isNotEmpty());
+	}
+
+	@DisplayName("등록된 스택을 수정합니다. 로그인 한 회원만 가능합니다.")
+	@Test
+	void modifyStack2() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when
+		ResultActions perform = mockMvc.perform(put("/stack/{stackId}", saveStack.getId())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.isSuccess").value(false))
+			.andExpect(jsonPath("$.message").value(ErrorCode.NEED_LOGIN.getMessage()))
+			.andExpect(jsonPath("$.code").value(ErrorCode.NEED_LOGIN.getCode()))
+			.andExpect(jsonPath("$.data").isEmpty());
 	}
 }

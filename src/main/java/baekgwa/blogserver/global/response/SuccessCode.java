@@ -45,6 +45,7 @@ public enum SuccessCode {
 	FIND_RELATIVE_STACK_SUCCESS(HttpStatus.OK, "글 관련 스택 내용 조회 성공"),
 	GET_ALL_STACK_SUCCESS(HttpStatus.OK, "모든 스택 내용 조회 성공"),
 	GET_STACK_DETAIL_SUCCESS(HttpStatus.OK, "스택 내용 조회 성공"),
+	MODIFY_STACK_SUCCESS(HttpStatus.OK, "스택 내용 수정 성공"),
 
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");

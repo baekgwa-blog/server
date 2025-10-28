@@ -26,6 +26,24 @@ import lombok.NoArgsConstructor;
 public class StackResponse {
 
 	@Getter
+	public static class CreateNewStack {
+		private final Long stackId;
+
+		public CreateNewStack(Long stackId) {
+			this.stackId = stackId;
+		}
+	}
+
+	@Getter
+	public static class ModifyStack {
+		private final Long stackId;
+
+		public ModifyStack(Long stackId) {
+			this.stackId = stackId;
+		}
+	}
+
+	@Getter
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackInfo {

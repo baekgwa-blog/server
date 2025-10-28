@@ -48,12 +48,13 @@ class StackServiceTest extends SpringBootTestSupporter {
 			StackRequest.NewStackSeries.of("title", "description", saveCategory.getId(), stackPostList, "imageUrl");
 
 		// when
-		stackService.createNewStackSeries(request);
+		StackResponse.CreateNewStack newStackSeries = stackService.createNewStackSeries(request);
 
 		// then
 		StackEntity saveStack = stackRepository.findAll().getFirst();
 		List<StackPostEntity> saveStackPost = stackPostRepository.findAll();
 
+		assertThat(newStackSeries.getStackId()).isEqualTo(saveStack.getId());
 		assertThat(saveStack.getTitle()).isEqualTo("title");
 		assertThat(saveStack.getDescription()).isEqualTo("description");
 		assertThat(saveStack.getCategory().getId()).isEqualTo(saveCategory.getId());
@@ -75,7 +76,8 @@ class StackServiceTest extends SpringBootTestSupporter {
 		List<StackRequest.StackPost> stackPostList =
 			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
 		StackRequest.NewStackSeries request =
-			StackRequest.NewStackSeries.of(saveStack.getTitle(), "description", saveCategory.getId(), stackPostList, "imageUrl");
+			StackRequest.NewStackSeries.of(saveStack.getTitle(), "description", saveCategory.getId(), stackPostList,
+				"imageUrl");
 
 		// when // then
 		assertThatThrownBy(() -> stackService.createNewStackSeries(request))
@@ -298,14 +300,14 @@ class StackServiceTest extends SpringBootTestSupporter {
 		assertThat(stackDetail.getCategory()).isEqualTo(saveStack.getCategory().getName());
 		assertThat(stackDetail.getThumbnailImage()).isEqualTo(saveStack.getThumbnailImage());
 		assertThat(stackDetail.getStackPostInfoList()).hasSize(2).satisfiesExactly(
-			post1-> {
+			post1 -> {
 				assertThat(post1.getPostId()).isEqualTo(savePostList.getFirst().getId());
 				assertThat(post1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
 				assertThat(post1.getDescription()).isEqualTo(savePostList.getFirst().getDescription());
 				assertThat(post1.getSlug()).isEqualTo(savePostList.getFirst().getSlug());
 				assertThat(post1.getThumbnailImage()).isEqualTo(savePostList.getFirst().getThumbnailImage());
 			},
-			post2-> {
+			post2 -> {
 				assertThat(post2.getPostId()).isEqualTo(savePostList.get(1).getId());
 				assertThat(post2.getTitle()).isEqualTo(savePostList.get(1).getTitle());
 				assertThat(post2.getDescription()).isEqualTo(savePostList.get(1).getDescription());
@@ -325,5 +327,110 @@ class StackServiceTest extends SpringBootTestSupporter {
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOTFOUND_STACK);
+	}
+
+	@DisplayName("특정 스택의 내용을 수정합니다. PUT 으로 동작합니다.")
+	@Test
+	void modifyStackSeries1() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet())).toList();
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when
+		StackResponse.ModifyStack modifyStack = stackService.modifyStackSeries(saveStack.getId(), request);
+
+		// then
+		assertThat(modifyStack.getStackId()).isEqualTo(saveStack.getId());
+		StackEntity findStack = stackRepository.findAll().getFirst();
+		List<StackPostEntity> findStackPostList = stackPostRepository.findAll();
+
+		assertThat(findStack.getTitle()).isEqualTo(request.getTitle());
+		assertThat(findStack.getDescription()).isEqualTo(request.getDescription());
+		assertThat(findStack.getThumbnailImage()).isEqualTo(request.getThumbnailImage());
+		assertThat(findStackPostList).hasSize(2)
+			.satisfiesExactlyInAnyOrder(
+				post1 -> {
+					assertThat(post1.getPost().getId()).isEqualTo(request.getStackPostList().getFirst().getPostId());
+					assertThat(post1.getSequence()).isEqualTo(request.getStackPostList().getFirst().getSequence());
+				},
+				post2 -> {
+					assertThat(post2.getPost().getId()).isEqualTo(request.getStackPostList().getLast().getPostId());
+					assertThat(post2.getSequence()).isEqualTo(request.getStackPostList().getLast().getSequence());
+				}
+			);
+	}
+
+	@DisplayName("특정 스택의 내용을 수정합니다. 없는 스택을 요청하면 잘못된 오류루를 발생합니다.")
+	@Test
+	void modifyStackSeries2() {
+		// given
+		List<StackRequest.StackPost> stackPostList = List.of(StackRequest.StackPost.of(1L, 1L));
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when // then
+		assertThatThrownBy(() -> stackService.modifyStackSeries(0L, request))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.NOTFOUND_STACK);
+	}
+
+	@DisplayName("특정 스택의 내용을 수정합니다. 이미 등록된 포스트는 추가 등록이 불가능합니다.")
+	@Test
+	void modifyStackSeries3() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(4, saveTagList, saveCategory);
+		List<StackEntity> saveStackList = stackDataFactory.newStack(2, saveCategory);
+		stackDataFactory.newStackPost(saveStackList.getFirst(), List.of(savePostList.get(0), savePostList.get(1)));
+		stackDataFactory.newStackPost(saveStackList.getLast(), List.of(savePostList.get(2), savePostList.get(3)));
+
+		AtomicLong al = new AtomicLong(0L);
+		List<PostEntity> requestPostList = List.of(savePostList.get(2), savePostList.get(3));
+		List<StackRequest.StackPost> stackPostList =
+			requestPostList.stream()
+				.map(post -> StackRequest.StackPost.of(post.getId(), al.incrementAndGet()))
+				.toList();
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when // then
+		assertThatThrownBy(() -> stackService.modifyStackSeries(saveStackList.getFirst().getId(), request))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.ALREADY_REGISTER_POST_STACK_SERIES);
+	}
+
+	@DisplayName("특정 스택의 내용을 수정합니다. 존재하지 않는 포스팅을 할당하려고 하면 오류를 발생합니다.")
+	@Test
+	void modifyStackSeries4() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		AtomicLong al = new AtomicLong(0L);
+		List<StackRequest.StackPost> stackPostList =
+			savePostList.stream().map(post -> StackRequest.StackPost.of(al.incrementAndGet(), al.get())).toList();
+		StackRequest.ModifyStackSeries request = StackRequest.ModifyStackSeries.of("title", "description",
+			stackPostList, "thumbnailImage");
+
+		// when // then
+		assertThatThrownBy(() -> stackService.modifyStackSeries(saveStack.getId(), request))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.INVALID_POST_LIST);
 	}
 }

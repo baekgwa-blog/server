@@ -68,4 +68,10 @@ public class StackEntity extends TemporalEntity {
 			.thumbnailImage(thumbnailImage)
 			.build();
 	}
+
+	public void modifyStack(String title, String description, String thumbnailImage) {
+		this.title = title;
+		this.description = description;
+		this.thumbnailImage = thumbnailImage;
+	}
 }

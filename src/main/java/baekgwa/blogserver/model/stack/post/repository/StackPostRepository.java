@@ -34,4 +34,6 @@ public interface StackPostRepository extends JpaRepository<StackPostEntity, Long
 
 	@Query("SELECT sp FROM StackPostEntity sp JOIN FETCH sp.stack s JOIN FETCH sp.post p")
 	List<StackPostEntity> findAllWithStackAndPost();
+
+	void deleteAllByStack(StackEntity stack);
 }

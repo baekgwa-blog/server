@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,12 +41,28 @@ public class StackController {
 
 	@PostMapping
 	@Operation(summary = "신규 스택 등록")
-	public BaseResponse<Void> createNewStack(
+	public BaseResponse<StackResponse.CreateNewStack> createNewStack(
 		@Valid @RequestBody StackRequest.NewStackSeries request
 	) {
-		stackService.createNewStackSeries(request);
-		return BaseResponse.success(SuccessCode.CREATE_STACK_SUCCESS);
+		StackResponse.CreateNewStack response = stackService.createNewStackSeries(request);
+		return BaseResponse.success(SuccessCode.CREATE_STACK_SUCCESS, response);
 	}
+
+	@PutMapping("{stackId}")
+	@Operation(summary = "스택 수정")
+	public BaseResponse<StackResponse.ModifyStack> modifyStack(
+		@PathVariable(value = "stackId") Long stackId,
+		@Valid @RequestBody StackRequest.ModifyStackSeries request
+	) {
+		StackResponse.ModifyStack response = stackService.modifyStackSeries(stackId, request);
+		return BaseResponse.success(SuccessCode.MODIFY_STACK_SUCCESS, response);
+	}
+
+	// @GetMapping("/modify/{stackId}")
+	// @Operation(summary = "수정용 스택 정보 조회")
+	// public BaseResponse<StackResponse.ModifyStack> modifyStack() {
+	// 	return BaseResponse
+	// }
 
 	@GetMapping
 	@Operation(summary = "스택 목록 조회")
