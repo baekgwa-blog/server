@@ -2,6 +2,9 @@ package baekgwa.blogserver.domain.authentication.controller;
 
 import static baekgwa.blogserver.global.constants.TokenConstant.*;
 
+import java.util.Arrays;
+
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +42,7 @@ public class AuthController {
 
 	private final AuthService authService;
 	private final AuthProperties authProperties;
+	private final Environment environment;
 
 	@PostMapping("/login")
 	@Operation(summary = "로그인")
@@ -54,7 +58,12 @@ public class AuthController {
 		accessTokenCookie.setHttpOnly(true);
 		accessTokenCookie.setPath("/");
 		accessTokenCookie.setMaxAge(authProperties.getTokenExpiration().intValue());
-		// accessTokenCookie.setSecure(true); // prod에서만
+
+		if (isProdProfile()) {
+			accessTokenCookie.setDomain(".baekgwa.site");
+			accessTokenCookie.setSecure(true);
+		}
+
 		response.addCookie(accessTokenCookie);
 
 		return BaseResponse.success(SuccessCode.LOGIN_SUCCESS);
@@ -67,9 +76,18 @@ public class AuthController {
 		deleteCookie.setPath("/");
 		deleteCookie.setMaxAge(0); // 즉시 만료
 		deleteCookie.setHttpOnly(true);
-		// deleteCookie.setSecure(true); // prod에서만
+
+		if (isProdProfile()) {
+			deleteCookie.setDomain(".baekgwa.site");
+			deleteCookie.setSecure(true);
+		}
+
 		response.addCookie(deleteCookie);
 
 		return BaseResponse.success(SuccessCode.LOGOUT_SUCCESS);
+	}
+
+	private boolean isProdProfile() {
+		return Arrays.asList(environment.getActiveProfiles()).contains("prod");
 	}
 }
