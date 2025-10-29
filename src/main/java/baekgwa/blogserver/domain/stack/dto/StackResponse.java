@@ -1,0 +1,183 @@
+package baekgwa.blogserver.domain.stack.dto;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import baekgwa.blogserver.model.stack.post.entity.StackPostEntity;
+import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+/**
+ * PackageName : baekgwa.blogserver.domain.stack.dto
+ * FileName    : StackResponse
+ * Author      : Baekgwa
+ * Date        : 2025-10-22
+ * Description : 
+ * =====================================================================================================================
+ * DATE          AUTHOR               NOTE
+ * ---------------------------------------------------------------------------------------------------------------------
+ * 2025-10-22     Baekgwa               Initial creation
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class StackResponse {
+
+	@Getter
+	public static class CreateNewStack {
+		private final Long stackId;
+
+		public CreateNewStack(Long stackId) {
+			this.stackId = stackId;
+		}
+	}
+
+	@Getter
+	public static class ModifyStack {
+		private final Long stackId;
+
+		public ModifyStack(Long stackId) {
+			this.stackId = stackId;
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class ModifyStackInfo {
+		private final String title;
+		private final String description;
+		private final String thumbnailImage;
+		private final String category;
+		private final List<ModifyStackPostInfo> stackPostList;
+
+		public static StackResponse.ModifyStackInfo of(StackEntity stack, List<ModifyStackPostInfo> modifyStackPostInfoList) {
+			return ModifyStackInfo
+				.builder()
+				.title(stack.getTitle())
+				.description(stack.getDescription())
+				.stackPostList(modifyStackPostInfoList)
+				.thumbnailImage(stack.getThumbnailImage())
+				.category(stack.getCategory().getName())
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class ModifyStackPostInfo {
+		private final String title;
+		private final Long postId;
+		private final Long sequence;
+
+		public static ModifyStackPostInfo of(StackPostEntity stackPost) {
+			return ModifyStackPostInfo
+				.builder()
+				.title(stackPost.getPost().getTitle())
+				.postId(stackPost.getPost().getId())
+				.sequence(stackPost.getSequence())
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackInfo {
+		private final Long stackId;
+		private final String title;
+		private final List<StackPostInfo> stackPostInfoList;
+
+		public static StackInfo of(StackEntity stack, List<StackPostInfo> stackPostInfoList) {
+			return StackInfo
+				.builder()
+				.stackId(stack.getId())
+				.title(stack.getTitle())
+				.stackPostInfoList(stackPostInfoList)
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackDetailInfo {
+		private final Long stackId;
+		private final String title;
+		private final String description;
+		private final String category;
+		private final String thumbnailImage;
+		private final LocalDateTime updatedAt;
+		private final Long count;
+
+		public static StackDetailInfo of(StackEntity stack, Long postCount, LocalDateTime updatedAt) {
+			return StackDetailInfo
+				.builder()
+				.stackId(stack.getId())
+				.title(stack.getTitle())
+				.description(stack.getDescription())
+				.category(stack.getCategory().getName())
+				.thumbnailImage(stack.getThumbnailImage())
+				.updatedAt(updatedAt)
+				.count(postCount)
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackDetail {
+		private final Long stackId;
+		private final String title;
+		private final String description;
+		private final String category;
+		private final String thumbnailImage;
+		private final List<StackPostInfo> stackPostInfoList;
+
+		public static StackDetail of(StackEntity stack, List<StackPostInfo> stackPostInfoList) {
+			return StackDetail
+				.builder()
+				.stackId(stack.getId())
+				.title(stack.getTitle())
+				.description(stack.getDescription())
+				.category(stack.getCategory().getName())
+				.thumbnailImage(stack.getThumbnailImage())
+				.stackPostInfoList(stackPostInfoList)
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class StackPostInfo {
+		private final Long postId;
+		private final String title;
+		private final String description;
+		private final String slug;
+		private final Long sequence;
+		private final Integer viewCount;
+		private final String thumbnailImage;
+		private final LocalDateTime createdAt;
+		private final LocalDateTime modifiedAt;
+
+		public static StackPostInfo of(StackPostEntity stackPost) {
+			return StackPostInfo
+				.builder()
+				.postId(stackPost.getPost().getId())
+				.title(stackPost.getPost().getTitle())
+				.description(stackPost.getPost().getDescription())
+				.slug(stackPost.getPost().getSlug())
+				.sequence(stackPost.getSequence())
+				.viewCount(stackPost.getPost().getViewCount())
+				.createdAt(stackPost.getCreatedAt())
+				.modifiedAt(stackPost.getModifiedAt())
+				.thumbnailImage(stackPost.getPost().getThumbnailImage())
+				.build();
+		}
+	}
+}

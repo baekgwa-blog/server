@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public enum FileType {
 
 	POST_IMAGE("post"),
+	STACK_SERIES_IMAGE("stack")
 	;
 
 	private final String path;

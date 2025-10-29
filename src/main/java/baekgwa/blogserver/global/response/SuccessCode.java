@@ -40,6 +40,14 @@ public enum SuccessCode {
 	//파일 업로드
 	UPLOAD_IMAGE_SUCCESS(HttpStatus.CREATED, "이미지 업로드 완료"),
 
+	//스택 시리즈
+	CREATE_STACK_SUCCESS(HttpStatus.CREATED, "스택 생성 완료"),
+	FIND_RELATIVE_STACK_SUCCESS(HttpStatus.OK, "글 관련 스택 내용 조회 성공"),
+	GET_ALL_STACK_SUCCESS(HttpStatus.OK, "모든 스택 내용 조회 성공"),
+	GET_STACK_DETAIL_SUCCESS(HttpStatus.OK, "스택 내용 조회 성공"),
+	MODIFY_STACK_SUCCESS(HttpStatus.OK, "스택 내용 수정 성공"),
+	GET_MODIFY_STACK_INFO_SUCCESS(HttpStatus.OK, "스택 내용 조회 성공"),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 

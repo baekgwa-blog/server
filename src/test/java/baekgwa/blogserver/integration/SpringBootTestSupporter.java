@@ -12,14 +12,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import baekgwa.blogserver.domain.authentication.service.AuthService;
 import baekgwa.blogserver.domain.category.service.CategoryService;
 import baekgwa.blogserver.domain.post.service.PostService;
+import baekgwa.blogserver.domain.stack.service.StackService;
 import baekgwa.blogserver.domain.tag.service.TagService;
 import baekgwa.blogserver.infra.upload.FileUploader;
 import baekgwa.blogserver.integration.factory.CategoryDataFactory;
 import baekgwa.blogserver.integration.factory.PostDataFactory;
+import baekgwa.blogserver.integration.factory.StackDataFactory;
 import baekgwa.blogserver.integration.factory.TagDataFactory;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
+import baekgwa.blogserver.model.stack.post.repository.StackPostRepository;
+import baekgwa.blogserver.model.stack.stack.repository.StackRepository;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
 import jakarta.persistence.EntityManager;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -55,6 +59,8 @@ public abstract class SpringBootTestSupporter {
 	protected TagDataFactory tagDataFactory;
 	@Autowired
 	protected PostDataFactory postDataFactory;
+	@Autowired
+	protected StackDataFactory stackDataFactory;
 
 	/**
 	 * Common
@@ -75,6 +81,10 @@ public abstract class SpringBootTestSupporter {
 	protected PostRepository postRepository;
 	@Autowired
 	protected PostTagRepository postTagRepository;
+	@Autowired
+	protected StackRepository stackRepository;
+	@Autowired
+	protected StackPostRepository stackPostRepository;
 
 	/**
 	 * service
@@ -87,6 +97,8 @@ public abstract class SpringBootTestSupporter {
 	protected TagService tagService;
 	@Autowired
 	protected PostService postService;
+	@Autowired
+	protected StackService stackService;
 
 	/**
 	 * MockBean
