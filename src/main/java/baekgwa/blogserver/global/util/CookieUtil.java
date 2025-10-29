@@ -56,7 +56,7 @@ public class CookieUtil {
 		cookie.setMaxAge(maxAge);
 
 		if (isProd) {
-			cookie.setDomain(".baekgwa.site");
+			cookie.setDomain("baekgwa.site");
 			cookie.setSecure(true);
 		}
 
