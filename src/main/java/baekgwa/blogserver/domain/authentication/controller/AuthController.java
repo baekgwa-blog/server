@@ -1,7 +1,5 @@
 package baekgwa.blogserver.domain.authentication.controller;
 
-import static baekgwa.blogserver.global.constants.TokenConstant.*;
-
 import java.util.Arrays;
 
 import org.springframework.core.env.Environment;
@@ -16,6 +14,7 @@ import baekgwa.blogserver.domain.authentication.service.AuthService;
 import baekgwa.blogserver.global.environment.AuthProperties;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
+import baekgwa.blogserver.global.util.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -53,16 +52,11 @@ public class AuthController {
 		// 로그인 처리
 		AuthResponse.Login authResponseLogin = authService.login(requestDto);
 
-		// 쿠키 추가
-		Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_KEY, authResponseLogin.getAccessToken());
-		accessTokenCookie.setHttpOnly(true);
-		accessTokenCookie.setPath("/");
-		accessTokenCookie.setMaxAge(authProperties.getTokenExpiration().intValue());
-
-		if (isProdProfile()) {
-			accessTokenCookie.setDomain(".baekgwa.site");
-			accessTokenCookie.setSecure(true);
-		}
+		Cookie accessTokenCookie = CookieUtil.createAccessTokenCookie(
+			authResponseLogin.getAccessToken(),
+			authProperties.getTokenExpiration().intValue(),
+			isProdProfile()
+		);
 
 		response.addCookie(accessTokenCookie);
 
@@ -72,15 +66,7 @@ public class AuthController {
 	@PostMapping("/logout")
 	@Operation(summary = "로그아웃")
 	public BaseResponse<Void> logout(HttpServletResponse response) {
-		Cookie deleteCookie = new Cookie(ACCESS_TOKEN_KEY, null);
-		deleteCookie.setPath("/");
-		deleteCookie.setMaxAge(0); // 즉시 만료
-		deleteCookie.setHttpOnly(true);
-
-		if (isProdProfile()) {
-			deleteCookie.setDomain(".baekgwa.site");
-			deleteCookie.setSecure(true);
-		}
+		Cookie deleteCookie = CookieUtil.createDeleteCookie(isProdProfile());
 
 		response.addCookie(deleteCookie);
 
