@@ -46,6 +46,46 @@ public class StackResponse {
 	@Getter
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class ModifyStackInfo {
+		private final String title;
+		private final String description;
+		private final String thumbnailImage;
+		private final String category;
+		private final List<ModifyStackPostInfo> stackPostList;
+
+		public static StackResponse.ModifyStackInfo of(StackEntity stack, List<ModifyStackPostInfo> modifyStackPostInfoList) {
+			return ModifyStackInfo
+				.builder()
+				.title(stack.getTitle())
+				.description(stack.getDescription())
+				.stackPostList(modifyStackPostInfoList)
+				.thumbnailImage(stack.getThumbnailImage())
+				.category(stack.getCategory().getName())
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	public static class ModifyStackPostInfo {
+		private final String title;
+		private final Long postId;
+		private final Long sequence;
+
+		public static ModifyStackPostInfo of(StackPostEntity stackPost) {
+			return ModifyStackPostInfo
+				.builder()
+				.title(stackPost.getPost().getTitle())
+				.postId(stackPost.getPost().getId())
+				.sequence(stackPost.getSequence())
+				.build();
+		}
+	}
+
+	@Getter
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackInfo {
 		private final Long stackId;
 		private final String title;

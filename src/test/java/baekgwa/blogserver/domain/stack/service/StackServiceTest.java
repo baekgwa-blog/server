@@ -433,4 +433,48 @@ class StackServiceTest extends SpringBootTestSupporter {
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.INVALID_POST_LIST);
 	}
+
+	@DisplayName("스택 수정용 정보 조회")
+	@Test
+	void getModifyStackInfo1() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		List<PostEntity> savePostList = postDataFactory.newPostList(2, saveTagList, saveCategory);
+		StackEntity saveStack = stackDataFactory.newStack(1, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, savePostList);
+
+		// when
+		StackResponse.ModifyStackInfo response = stackService.getModifyStackInfo(saveStack.getId());
+
+		// then
+		assertThat(response.getTitle()).isEqualTo(saveStack.getTitle());
+		assertThat(response.getDescription()).isEqualTo(saveStack.getDescription());
+		assertThat(response.getThumbnailImage()).isEqualTo(saveStack.getThumbnailImage());
+		assertThat(response.getCategory()).isEqualTo(saveStack.getCategory().getName());
+		assertThat(response.getStackPostList()).hasSize(2).satisfiesExactlyInAnyOrder(
+			post1 -> {
+				assertThat(post1.getTitle()).isEqualTo(savePostList.getFirst().getTitle());
+				assertThat(post1.getPostId()).isEqualTo(savePostList.getFirst().getId());
+				assertThat(post1.getSequence()).isPositive().isNotZero();
+			},
+			post2 -> {
+				assertThat(post2.getTitle()).isEqualTo(savePostList.getLast().getTitle());
+				assertThat(post2.getPostId()).isEqualTo(savePostList.getLast().getId());
+				assertThat(post2.getSequence()).isPositive().isNotZero();
+			}
+		);
+	}
+
+	@DisplayName("스택 수정용 정보 조회. 없는 스택에 대한 정보 조회는 오류를 발생합니다.")
+	@Test
+	void getModifyStackInfo2() {
+		// given
+
+		// when // then
+		assertThatThrownBy(() -> stackService.getModifyStackInfo(1L))
+			.isInstanceOf(GlobalException.class)
+			.extracting("errorCode")
+			.isEqualTo(ErrorCode.NOTFOUND_STACK);
+	}
 }

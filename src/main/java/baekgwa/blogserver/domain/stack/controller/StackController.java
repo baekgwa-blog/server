@@ -58,11 +58,14 @@ public class StackController {
 		return BaseResponse.success(SuccessCode.MODIFY_STACK_SUCCESS, response);
 	}
 
-	// @GetMapping("/modify/{stackId}")
-	// @Operation(summary = "수정용 스택 정보 조회")
-	// public BaseResponse<StackResponse.ModifyStack> modifyStack() {
-	// 	return BaseResponse
-	// }
+	@GetMapping("/modify/{stackId}")
+	@Operation(summary = "수정용 스택 정보 조회")
+	public BaseResponse<StackResponse.ModifyStackInfo> getModifyStackInfo(
+		@PathVariable(value = "stackId") Long stackId
+	) {
+		StackResponse.ModifyStackInfo response = stackService.getModifyStackInfo(stackId);
+		return BaseResponse.success(SuccessCode.GET_MODIFY_STACK_INFO_SUCCESS, response);
+	}
 
 	@GetMapping
 	@Operation(summary = "스택 목록 조회")
