@@ -28,6 +28,12 @@ dependencies {
     // Spring Boot Starter
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
