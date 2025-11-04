@@ -31,3 +31,8 @@ s3:
   region: ap-northeast-2
   accessKey: ${S3_ACCESS_KEY}
   secretKey: ${S3_SECRET_KEY}
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+  password: ${REDIS_PASSWORD}

@@ -2,6 +2,7 @@ package baekgwa.blogserver.model.post.post.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import org.springframework.util.StringUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import baekgwa.blogserver.domain.post.dto.PostResponse;
@@ -105,6 +108,37 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 			.fetchOne();
 
 		return new PageImpl<>(findData, pageable, totalCount != null ? totalCount : 0);
+	}
+
+	@Override
+	public void bulkUpdateViewCounts(Map<Long, Long> viewCounts) {
+		if(viewCounts == null || viewCounts.isEmpty()) {
+			return;
+		}
+
+		Set<Long> idSet = viewCounts.keySet();
+		CaseBuilder caseBuilder = new CaseBuilder();
+		CaseBuilder.Cases<Integer, NumberExpression<Integer>> caseExpression = null;
+
+		for (Map.Entry<Long, Long> entry : viewCounts.entrySet()) {
+			if(caseExpression == null) {
+				caseExpression = caseBuilder
+					.when(postEntity.id.eq(entry.getKey()))
+					.then(postEntity.viewCount.add(entry.getValue().intValue()));
+			} else {
+				caseExpression = caseExpression
+					.when(postEntity.id.eq(entry.getKey()))
+					.then(postEntity.viewCount.add(entry.getValue().intValue()));
+			}
+		}
+
+		if (caseExpression != null) {
+			queryFactory
+				.update(postEntity)
+				.set(postEntity.viewCount, caseExpression.otherwise(postEntity.viewCount))
+				.where(postEntity.id.in(idSet))
+				.execute();
+		}
 	}
 
 	private OrderSpecifier<?> createOrderSpecifier(PostListSort sort) {

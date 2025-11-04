@@ -5,6 +5,7 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.util.SlugUtil;
+import baekgwa.blogserver.infra.view.event.PostViewEvent;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
@@ -30,6 +32,7 @@ import baekgwa.blogserver.model.tag.entity.TagEntity;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * PackageName : baekgwa.blogserver.domain.post.service
@@ -42,6 +45,7 @@ import lombok.RequiredArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-19     Baekgwa               Initial creation
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -50,6 +54,8 @@ public class PostService {
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
 	private final CategoryRepository categoryRepository;
+
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public PostResponse.CreatePostResponse create(PostRequest.CreatePost request) {
@@ -93,7 +99,7 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PostResponse.GetPostDetailResponse getPostDetail(String slug) {
+	public PostResponse.GetPostDetailResponse getPostDetail(String slug, String remoteAddr) {
 		// 1. 포스팅 글 조회
 		PostEntity postEntity = postRepository.findBySlug(slug).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
@@ -103,6 +109,9 @@ public class PostService {
 			.stream()
 			.map(tag -> tag.getTag().getName())
 			.toList();
+
+		// 3. viewCount 증가
+		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId(), remoteAddr));
 
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
 	}

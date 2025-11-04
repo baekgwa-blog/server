@@ -107,4 +107,9 @@ public abstract class SpringBootTestSupporter {
 	private S3Client s3Client;
 	@MockitoBean
 	protected FileUploader fileUploader;
+
+	/**
+	 * Static variable
+	 */
+	protected static final String REMOTE_ADDR = "0:0:0:0:0:0:0:1";
 }
