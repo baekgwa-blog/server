@@ -65,6 +65,11 @@ public class ViewCountRedisStore implements ViewCountStore {
 			));
 	}
 
+	@Override
+	public void clearViewCount(ViewDomain domain) {
+		st.delete(domain.getKey());
+	}
+
 	private long getSecondsUntilMidnight() {
 		ZoneId kst = ZoneId.of("Asia/Seoul");
 		ZonedDateTime now = ZonedDateTime.now(kst);

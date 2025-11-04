@@ -1,5 +1,7 @@
 package baekgwa.blogserver.model.post.post.repository;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -26,4 +28,6 @@ public interface PostRepositoryCustom {
 		Pageable pageable,
 		PostListSort sort
 	);
+
+	void bulkUpdateViewCounts(Map<Long, Long> viewCounts);
 }

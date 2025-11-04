@@ -34,3 +34,7 @@ management:
   endpoint:
     health:
       show-details=always:
+
+logging:
+  level:
+    baekgwa.blogserver: DEBUG

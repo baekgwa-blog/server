@@ -20,4 +20,6 @@ public interface ViewCountStore {
 	void incrementViewCount(ViewDomain domain, Long id, String remoteAddr);
 
 	Map<Long, Long> getAllViewCount(ViewDomain domain);
+
+	void clearViewCount(ViewDomain domain);
 }
