@@ -57,7 +57,7 @@ public class PostController {
 		@RequestParam(value = "slug", required = true) String slug,
 		HttpServletRequest request
 	) {
-		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug, request);
+		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug, request.getRemoteAddr());
 		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
 	}
 
