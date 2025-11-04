@@ -8,6 +8,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import baekgwa.blogserver.infra.view.type.ViewDomain;
 import baekgwa.blogserver.infra.view.updater.ViewCountUpdater;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * PackageName : baekgwa.blogserver.global.listener
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 4.     Baekgwa               Initial creation
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ViewCountEventListener {
@@ -29,6 +31,6 @@ public class ViewCountEventListener {
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handlePostViewEvent(PostViewEvent event) {
-		viewCountUpdater.updateViewCount(ViewDomain.POST, event.postId());
+		viewCountUpdater.updateViewCount(ViewDomain.POST, event.postId(), event.remoteAddr());
 	}
 }

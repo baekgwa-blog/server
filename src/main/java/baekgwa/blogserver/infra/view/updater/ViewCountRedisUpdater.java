@@ -24,7 +24,7 @@ public class ViewCountRedisUpdater implements ViewCountUpdater {
 	private final ViewCountStore viewCountStore;
 
 	@Override
-	public void updateViewCount(ViewDomain viewDomain, Long id) {
-		viewCountStore.incrementViewCount(viewDomain, id);
+	public void updateViewCount(ViewDomain viewDomain, Long id, String remoteAddr) {
+		viewCountStore.incrementViewCount(viewDomain, id, remoteAddr);
 	}
 }

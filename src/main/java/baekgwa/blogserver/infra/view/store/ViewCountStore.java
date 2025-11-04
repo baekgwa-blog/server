@@ -17,7 +17,7 @@ import baekgwa.blogserver.infra.view.type.ViewDomain;
  */
 public interface ViewCountStore {
 
-	void incrementViewCount(ViewDomain domain, Long id);
+	void incrementViewCount(ViewDomain domain, Long id, String remoteAddr);
 
 	Map<Long, Long> getAllViewCount(ViewDomain domain);
 }

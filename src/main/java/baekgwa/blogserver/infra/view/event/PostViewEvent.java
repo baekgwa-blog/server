@@ -11,5 +11,5 @@ package baekgwa.blogserver.infra.view.event;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 4.     Baekgwa               Initial creation
  */
-public record PostViewEvent(Long postId) {
+public record PostViewEvent(Long postId, String remoteAddr) {
 }

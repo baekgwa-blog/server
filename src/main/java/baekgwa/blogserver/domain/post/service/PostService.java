@@ -30,6 +30,7 @@ import baekgwa.blogserver.model.post.tag.entity.PostTagEntity;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +100,7 @@ public class PostService {
 	}
 
 	@Transactional(readOnly = true)
-	public PostResponse.GetPostDetailResponse getPostDetail(String slug) {
+	public PostResponse.GetPostDetailResponse getPostDetail(String slug, HttpServletRequest request) {
 		// 1. 포스팅 글 조회
 		PostEntity postEntity = postRepository.findBySlug(slug).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
@@ -111,7 +112,7 @@ public class PostService {
 			.toList();
 
 		// 3. viewCount 증가
-		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId()));
+		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId(), request.getRemoteAddr()));
 
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
 	}

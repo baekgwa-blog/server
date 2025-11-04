@@ -20,5 +20,5 @@ public interface ViewCountUpdater {
 	 * 실제 증가됨은, Consumer 를 통해 해결
 	 * @param id
 	 */
-	void updateViewCount(ViewDomain viewDomain, Long id);
+	void updateViewCount(ViewDomain viewDomain, Long id, String remoteAddr);
 }
