@@ -4,13 +4,19 @@ import static baekgwa.blogserver.infra.embedding.service.EmbeddingPostMetadataKe
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
+import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -46,22 +52,28 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 		log.debug("converted content : {}", content);
 
 		// 2. metadata 생성
+		String tags = tagList.stream()
+			.map(TagEntity::getName)
+			.collect(Collectors.joining(","));
+
 		Metadata metadata = Metadata.from(Map.of(
 			ID, post.getId(),
 			TITLE, post.getTitle(),
 			SLUG, post.getSlug(),
 			CATEGORY, post.getCategory().getName(),
-			TAGS, tagList.stream().map(TagEntity::getName).toList(),
+			TAGS, tags,
 			DESCRIPTION, post.getDescription(),
-			CREATED_AT, post.getCreatedAt()
+			CREATED_AT, post.getCreatedAt().toString()
 		));
 		log.debug("meta data {}", metadata);
 
-		// 3. TextSegment 생성
-		TextSegment textSegment = TextSegment.from(content, metadata);
+		// 3. Document 생성 및 청킹
+		Document document = Document.from(content, metadata);
+		DocumentSplitter splitter = DocumentSplitters.recursive(500, 50);
+		List<TextSegment> textSegments = splitter.split(document);
 
 		// 4. 임베딩 데이터 생성
-		Response<Embedding> embeddingResponse = embeddingModel.embed(textSegment);
-		log.debug("embedding vector size: {}", embeddingResponse.content().vector().length);
+		Response<List<Embedding>> embeddingResponse = embeddingModel.embedAll(textSegments);
+		log.debug("Generated {} embeddings", embeddingResponse.content().size());
 	}
 }
