@@ -1,0 +1,3 @@
+open-ai:
+  apiKey: ${OPENAI_API_KEY}
+  embeddingModelName: ${OPENAI_EMBEDDING_MODEL_NAME}

@@ -7,6 +7,7 @@ spring:
       - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_db.yml
       - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_server.yml
       - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_auth.yml
+      - optional:classpath:config/${spring.profiles.active}/application-${spring.profiles.active}_ai.yml
   profiles:
     group:
       dev: [ "dev_db", "dev_server", "dev_auth" ]
