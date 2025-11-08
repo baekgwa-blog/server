@@ -23,4 +23,5 @@ public class EmbeddingPostMetadataKeys {
 	public static final String TAGS = "tags";
 	public static final String DESCRIPTION = "description";
 	public static final String CREATED_AT = "created_at";
+	public static final String SOURCE = "source";
 }

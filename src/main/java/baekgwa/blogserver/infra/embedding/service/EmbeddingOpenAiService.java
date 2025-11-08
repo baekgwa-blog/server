@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import baekgwa.blogserver.global.environment.UrlProperties;
+import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
+import baekgwa.blogserver.model.embedding.repository.EmbeddingFailureRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import dev.langchain4j.data.document.Document;
@@ -41,10 +42,10 @@ import lombok.extern.slf4j.Slf4j;
 public class EmbeddingOpenAiService implements EmbeddingService {
 
 	private final EmbeddingModel embeddingModel;
+	private final EmbeddingFailureRepository embeddingFailureRepository;
+	private final UrlProperties urlProperties;
 
-	// todo : elk(vector db)에 저장
-	// private final ElasticSearchConnector elastconector;
-
+	// TODO : 실패 복구 전략 추가할 것.
 	@Override
 	public void embeddingPostToVector(PostEntity post, List<TagEntity> tagList) {
 		// 1. content 내용, html -> text 변환 by Jsoup
@@ -56,6 +57,8 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			.map(TagEntity::getName)
 			.collect(Collectors.joining(","));
 
+		log.debug("urlProperties.getFrontend() = {}", urlProperties.getFrontend());
+
 		Metadata metadata = Metadata.from(Map.of(
 			ID, post.getId(),
 			TITLE, post.getTitle(),
@@ -63,17 +66,33 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			CATEGORY, post.getCategory().getName(),
 			TAGS, tags,
 			DESCRIPTION, post.getDescription(),
-			CREATED_AT, post.getCreatedAt().toString()
+			CREATED_AT, post.getCreatedAt().toString(),
+			SOURCE, generateOriginSource(urlProperties.getFrontend(), post.getSlug())
 		));
 		log.debug("meta data {}", metadata);
 
 		// 3. Document 생성 및 청킹
 		Document document = Document.from(content, metadata);
 		DocumentSplitter splitter = DocumentSplitters.recursive(500, 50);
-		List<TextSegment> textSegments = splitter.split(document);
+		List<TextSegment> textSegmentList = splitter.split(document)
+			.stream()
+			.map(segment -> TextSegment.from(segment.text(), metadata))
+			.toList();
 
-		// 4. 임베딩 데이터 생성
-		Response<List<Embedding>> embeddingResponse = embeddingModel.embedAll(textSegments);
-		log.debug("Generated {} embeddings", embeddingResponse.content().size());
+		// 4. 임베딩 데이터 생성 with OpenAi
+		Response<List<Embedding>> embeddingResponse = null;
+		try {
+			embeddingResponse = embeddingModel.embedAll(textSegmentList);
+			log.debug("Generated {} embeddings", embeddingResponse.content().size());
+		} catch (Exception e) {
+			log.warn("Embedding failed for postId={}: {}", post.getId(), e.getMessage());
+			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(post.getId(), e.getMessage());
+			embeddingFailureRepository.save(failure);
+			return;
+		}
+	}
+
+	private String generateOriginSource(String feUrl, String slug) {
+		return feUrl + "/" + slug;
 	}
 }

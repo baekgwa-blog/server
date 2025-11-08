@@ -1,10 +1,7 @@
 package baekgwa.blogserver.global.config;
 
-import java.util.Arrays;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 import baekgwa.blogserver.global.environment.OpenAiProperties;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -27,22 +24,13 @@ import lombok.RequiredArgsConstructor;
 public class OpenAiConfig {
 
 	private final OpenAiProperties openAiProperties;
-	private final Environment environment;
 
 	@Bean
 	public EmbeddingModel embeddingModel() {
-		boolean isProd = isProdProfile();
-
 		return OpenAiEmbeddingModel.builder()
 			.apiKey(openAiProperties.getApiKey())
 			.modelName(openAiProperties.getEmbeddingModelName())
 			.user("baekgwa")
-			.logRequests(!isProd)
-			.logResponses(!isProd)
 			.build();
-	}
-
-	private boolean isProdProfile() {
-		return Arrays.asList(environment.getActiveProfiles()).contains("prod");
 	}
 }
