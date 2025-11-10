@@ -7,7 +7,7 @@ import baekgwa.blogserver.model.tag.entity.TagEntity;
 
 /**
  * PackageName : baekgwa.blogserver.infra.embedding.event
- * FileName    : EmbeddingPostEvent
+ * FileName    : EmbeddingCreatePostEvent
  * Author      : Baekgwa
  * Date        : 25. 11. 7.
  * Description : 
@@ -16,5 +16,5 @@ import baekgwa.blogserver.model.tag.entity.TagEntity;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 7.     Baekgwa               Initial creation
  */
-public record EmbeddingPostEvent(PostEntity post, List<TagEntity> tagList) {
+public record EmbeddingCreatePostEvent(PostEntity post, List<TagEntity> tagList) {
 }
