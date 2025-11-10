@@ -29,8 +29,19 @@ public class EmbeddingEventListener {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void handleEmbeddingNewPostEvent(EmbeddingPostEvent event) {
-		log.debug("신규 포스트 id={} title={}, embedding event 실시", event.post().getId(), event.post().getTitle());
-		embeddingService.embeddingPostToVector(event.post(), event.tagList());
+	public void handleEmbeddingNewPostEvent(EmbeddingCreatePostEvent event) {
+		embeddingService.createEmbeddingPost(event.post(), event.tagList());
+	}
+
+	@Async
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void handleEmbeddingDeletePost(EmbeddingDeletePostEvent event) {
+		embeddingService.deleteEmbeddingPost(event.postId());
+	}
+
+	@Async
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void handleEmbeddingUpdatePost(EmbeddingUpdatePostEvent event) {
+		embeddingService.updateEmbeddingPost(event.post(), event.tagList());
 	}
 }

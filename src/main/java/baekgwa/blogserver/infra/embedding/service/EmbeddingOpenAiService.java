@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
 import baekgwa.blogserver.global.environment.UrlProperties;
 import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
+import baekgwa.blogserver.model.embedding.entity.EmbeddingJob;
 import baekgwa.blogserver.model.embedding.repository.EmbeddingFailureRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
@@ -27,6 +28,8 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,18 +56,17 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 
 	// TODO : 실패 복구 전략 추가할 것.
 	@Override
-	public void embeddingPostToVector(PostEntity post, List<TagEntity> tagList) {
+	public void createEmbeddingPost(PostEntity post, List<TagEntity> tagList) {
+		log.debug("Create embedding for postId={}", post.getId());
+
 		try {
 			// 1. content 내용, html -> text 변환 by Jsoup
 			String content = Jsoup.parse(post.getContent()).text();
-			log.debug("converted content : {}", content);
 
 			// 2. metadata 생성
 			String tags = tagList.stream()
 				.map(TagEntity::getName)
 				.collect(Collectors.joining(","));
-
-			log.debug("urlProperties.getFrontend() = {}", urlProperties.getFrontend());
 
 			Metadata metadata = Metadata.from(Map.of(
 				ID, post.getId(),
@@ -76,7 +78,6 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 				CREATED_AT, post.getCreatedAt().toString(),
 				SOURCE, generateOriginSource(urlProperties.getFrontend(), post.getSlug())
 			));
-			log.debug("meta data {}", metadata);
 
 			// 3. Document 생성 및 청킹
 			Document document = Document.from(content, metadata);
@@ -97,8 +98,10 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 
 		} catch (Exception e) {
 			log.warn("Embedding failed for postId={}: {}", post.getId(), e.getMessage());
-			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(post.getId(), e.getMessage());
+			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(post.getId(), e.getMessage(),
+				EmbeddingJob.CREATE);
 			embeddingFailureRepository.save(failure);
+			throw e;
 		}
 	}
 
@@ -138,6 +141,33 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 		}
 
 		return Collections.emptyList();
+	}
+
+	@Override
+	public void deleteEmbeddingPost(Long postId) {
+		log.debug("Deleting embedding for postId={}", postId);
+		try {
+			Filter filter = MetadataFilterBuilder.metadataKey(ID).isEqualTo(postId);
+			embeddingStore.removeAll(filter);
+			log.debug("Successfully deleted embedding for postId={}", postId);
+		} catch (Exception e) {
+			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(postId, e.getMessage(), EmbeddingJob.DELETE);
+			embeddingFailureRepository.save(failure);
+			log.error("Failed to delete embedding for postId={}: {}", postId, e.getMessage());
+			throw e;
+		}
+	}
+
+	@Override
+	public void updateEmbeddingPost(PostEntity post, List<TagEntity> tagList) {
+		log.debug("Updating embedding for postId={}", post.getId());
+
+		// 1. 메타데이터 기반 삭제 처리
+		deleteEmbeddingPost(post.getId());
+
+		// 2. 신규 포스트 등록
+		createEmbeddingPost(post, tagList);
+		log.debug("Successfully updating embedding for postId={}", post.getId());
 	}
 
 	private String generateOriginSource(String feUrl, String slug) {

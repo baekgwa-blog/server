@@ -21,7 +21,8 @@ import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.util.SlugUtil;
-import baekgwa.blogserver.infra.embedding.event.EmbeddingPostEvent;
+import baekgwa.blogserver.infra.embedding.event.EmbeddingCreatePostEvent;
+import baekgwa.blogserver.infra.embedding.event.EmbeddingDeletePostEvent;
 import baekgwa.blogserver.infra.view.event.PostViewEvent;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
@@ -96,7 +97,7 @@ public class PostService {
 		postTagRepository.saveAll(newPostTag);
 
 		// 8. post embedding event 발행
-		eventPublisher.publishEvent(new EmbeddingPostEvent(newPost, findTagEntityList));
+		eventPublisher.publishEvent(new EmbeddingCreatePostEvent(newPost, findTagEntityList));
 
 		// 9. 응답 생성. 리다이렉션용 slug 주소
 		return PostResponse.CreatePostResponse.from(generatedSlug);
@@ -150,6 +151,9 @@ public class PostService {
 			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
 		}
 		postRepository.deleteById(postId);
+
+		// delete post embedding event 발행
+		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(postId));
 	}
 
 	private String extractThumbnailByContent(@NonNull String content) {

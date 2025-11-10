@@ -19,7 +19,11 @@ import baekgwa.blogserver.model.tag.entity.TagEntity;
  */
 public interface EmbeddingService {
 
-	void embeddingPostToVector(PostEntity post, List<TagEntity> tagList);
+	void createEmbeddingPost(PostEntity post, List<TagEntity> tagList);
 
 	List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK);
+
+	void deleteEmbeddingPost(Long postId);
+
+	void updateEmbeddingPost(PostEntity post, List<TagEntity> tagList);
 }

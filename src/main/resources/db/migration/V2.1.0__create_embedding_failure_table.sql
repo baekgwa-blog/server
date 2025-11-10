@@ -11,11 +11,12 @@
 
 CREATE TABLE `embedding_failure`
 (
-    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
-    `post_id`     BIGINT       NOT NULL,
-    `reason`      VARCHAR(255) NOT NULL,
-    `created_at`  DATETIME     NOT NULL,
-    `modified_at` DATETIME     NOT NULL,
+    `id`            BIGINT       NOT NULL AUTO_INCREMENT,
+    `post_id`       BIGINT       NOT NULL,
+    `reason`        VARCHAR(255) NOT NULL,
+    `embedding_job` VARCHAR(50)  NOT NULL,
+    `created_at`    DATETIME     NOT NULL,
+    `modified_at`   DATETIME     NOT NULL,
     PRIMARY KEY `pk_ef_id` (`id`),
     UNIQUE KEY `uk_ef_post_id` (`post_id`)
 );
