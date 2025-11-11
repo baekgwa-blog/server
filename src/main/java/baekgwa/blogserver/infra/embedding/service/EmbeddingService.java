@@ -2,6 +2,8 @@ package baekgwa.blogserver.infra.embedding.service;
 
 import java.util.List;
 
+import org.springframework.lang.NonNull;
+
 import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
@@ -21,7 +23,7 @@ public interface EmbeddingService {
 
 	void createEmbeddingPost(PostEntity post, List<TagEntity> tagList);
 
-	List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK);
+	List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK, @NonNull List<String> filter);
 
 	void deleteEmbeddingPost(Long postId);
 

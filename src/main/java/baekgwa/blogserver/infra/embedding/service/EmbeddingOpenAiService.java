@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
@@ -65,14 +66,14 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 
 			// 2. metadata 생성
 			String tags = tagList.stream()
-				.map(TagEntity::getName)
+				.map(tag -> tag.getName().toLowerCase())
 				.collect(Collectors.joining(","));
 
 			Metadata metadata = Metadata.from(Map.of(
 				ID, post.getId(),
 				TITLE, post.getTitle(),
 				SLUG, post.getSlug(),
-				CATEGORY, post.getCategory().getName(),
+				CATEGORY, post.getCategory().getName().toLowerCase(),
 				TAGS, tags,
 				DESCRIPTION, post.getDescription(),
 				CREATED_AT, post.getCreatedAt().toString(),
@@ -110,20 +111,34 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 	 * @param sentence 문서
 	 */
 	@Override
-	public List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK) {
-		log.debug("Searching for: '{}', topK: {}", sentence, topK);
+	public List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK, @NonNull List<String> filter) {
+		log.debug("Searching for: '{}', topK: {}, filter: {}", sentence, topK, filter);
 
 		try {
 			// 1. 질문 문장 임베딩 화
 			Embedding queryEmbedding = embeddingModel.embed(sentence).content();
 
 			// 2. EmbeddingSearchRequest 생성
-			EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest
+			EmbeddingSearchRequest.EmbeddingSearchRequestBuilder requestBuilder = EmbeddingSearchRequest
 				.builder()
 				.queryEmbedding(queryEmbedding)
 				.maxResults(topK)
-				.minScore(0.6)
-				.build();
+				.minScore(0.6);
+
+			// 2-1. Filter 추가
+			if (!filter.isEmpty()) {
+				log.debug("add keyword filed : {}", filter);
+				List<String> lowerCaseFilter = filter.stream().map(String::toLowerCase).toList();
+				Filter categoryFilter = MetadataFilterBuilder.metadataKey(CATEGORY).isIn(lowerCaseFilter);
+				requestBuilder.filter(categoryFilter);
+
+				// 현재, Tag 관련 버그 있어서, 추후 수정 필요.
+				// Filter tagsFilter = MetadataFilterBuilder.metadataKey(TAGS).isIn(filter);
+				// Filter combinedFilter = categoryFilter.or(tagsFilter);
+				//
+				// requestBuilder.filter(combinedFilter);
+			}
+			EmbeddingSearchRequest searchRequest = requestBuilder.build();
 
 			// 3. Vector DB 에 조회
 			EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(searchRequest);
