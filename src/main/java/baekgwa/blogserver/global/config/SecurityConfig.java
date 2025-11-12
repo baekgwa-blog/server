@@ -96,6 +96,9 @@ public class SecurityConfig {
 				.requestMatchers(GET, "/stack").permitAll()
 				.requestMatchers(GET, "/stack/{postId}").permitAll()
 
+				// Ai
+				.requestMatchers(POST, "/ai/stream/**").permitAll()
+
 				.anyRequest().authenticated());
 
 		// ❗ 인증 Filter 추가

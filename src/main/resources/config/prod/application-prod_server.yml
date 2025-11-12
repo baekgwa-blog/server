@@ -25,6 +25,9 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
       file-size-threshold: 2KB
+  mvc:
+    async:
+      request-timeout: -1
 
 url:
   frontend: ${FRONTEND_URL}

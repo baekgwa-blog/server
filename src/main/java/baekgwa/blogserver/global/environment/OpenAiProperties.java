@@ -24,4 +24,5 @@ import lombok.Setter;
 public class OpenAiProperties {
 	private String apiKey;
 	private String embeddingModelName;
+	private String llmModelName;
 }

@@ -4,8 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import baekgwa.blogserver.global.environment.OpenAiProperties;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -31,6 +33,15 @@ public class OpenAiConfig {
 			.apiKey(openAiProperties.getApiKey())
 			.modelName(openAiProperties.getEmbeddingModelName())
 			.user("baekgwa")
+			.build();
+	}
+
+	@Bean
+	public StreamingChatModel streamingChatModel() {
+		return OpenAiStreamingChatModel
+			.builder()
+			.apiKey(openAiProperties.getApiKey())
+			.modelName(openAiProperties.getLlmModelName())
 			.build();
 	}
 }

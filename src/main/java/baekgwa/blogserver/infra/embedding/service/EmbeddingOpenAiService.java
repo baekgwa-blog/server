@@ -2,7 +2,6 @@ package baekgwa.blogserver.infra.embedding.service;
 
 import static baekgwa.blogserver.infra.embedding.service.EmbeddingPostMetadataKeys.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
 import baekgwa.blogserver.global.environment.UrlProperties;
 import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
 import baekgwa.blogserver.model.embedding.entity.EmbeddingJob;
@@ -65,6 +63,8 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			String content = Jsoup.parse(post.getContent()).text();
 
 			// 2. metadata 생성
+			// todo: 현재, Langchain4j 에서, List 타입을 지원하지 않음.
+			// 추후, 업데이트 된다면, List 형태를 추가적으로 전달해서, tag 관련 내용도 필터링 될 수 있도록 구성
 			String tags = tagList.stream()
 				.map(tag -> tag.getName().toLowerCase())
 				.collect(Collectors.joining(","));
@@ -111,8 +111,8 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 	 * @param sentence 문서
 	 */
 	@Override
-	public List<RetrievalResultDto> searchRetrievalPost(String sentence, Integer topK, @NonNull List<String> filter) {
-		log.debug("Searching for: '{}', topK: {}, filter: {}", sentence, topK, filter);
+	public EmbeddingSearchResult<TextSegment> searchRetrievalPost(String sentence, @NonNull List<String> filter) {
+		log.debug("Searching for: '{}', filter: {}", sentence, filter);
 
 		try {
 			// 1. 질문 문장 임베딩 화
@@ -122,7 +122,7 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			EmbeddingSearchRequest.EmbeddingSearchRequestBuilder requestBuilder = EmbeddingSearchRequest
 				.builder()
 				.queryEmbedding(queryEmbedding)
-				.maxResults(topK)
+				.maxResults(10)
 				.minScore(0.6);
 
 			// 2-1. Filter 추가
@@ -140,22 +140,13 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			}
 			EmbeddingSearchRequest searchRequest = requestBuilder.build();
 
-			// 3. Vector DB 에 조회
-			EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(searchRequest);
-
-			// 4. dto 변환
-			return searchResult.matches().stream()
-				.map(match -> RetrievalResultDto.from(
-					match.score(),
-					match.embedded().text(),
-					match.embedded().metadata().toMap()
-				))
-				.toList();
+			// 3. Vector DB 에 조회 후 반환
+			return embeddingStore.search(searchRequest);
 		} catch (Exception e) {
 			log.error("Search failed details:", e);
 		}
 
-		return Collections.emptyList();
+		return null;
 	}
 
 	@Override
