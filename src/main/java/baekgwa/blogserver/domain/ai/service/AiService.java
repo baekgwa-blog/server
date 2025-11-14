@@ -97,40 +97,81 @@ public class AiService {
 		SseEmitter emitter,
 		EmbeddingSearchResult<TextSegment> retrievalResult
 	) {
-		// 1. SystemMessage 작성
+		// 1. SystemMessage 작성 (기본 역할 부여)
 		String systemPrompt = """
-			당신은 '백과'의 블로그 콘텐츠를 기반으로 사용자의 질문에 답변하는 AI 어시스턴트입니다.
-			
-			다음 규칙을 반드시 따르세요:
-			
-			1. 당신의 모든 답변은 반드시 제공된 문서(검색 결과)에 기반해야 합니다.
-			   - 검색된 문서 내용에 근거가 없으면, 새로운 정보를 생성하거나 추측하지 마세요.
-			   - 관련 문서가 전혀 없으면, 다음 문장을 그대로 출력하세요:
-			     "현재 백과 블로그에는 관련 게시글이 없습니다 🥲"
-			
-			2. 사용자의 질문에 대해 문서에서 얻은 내용을 바탕으로 간결하고 명확하게 설명하세요.
-			
-			3. 답변이 끝난 후, 사용자가 참고할 수 있도록 관련 블로그 포스트 목록을 함께 제공합니다.
-			   - 문서의 메타데이터에서 `SOURCE`와 `TITLE` 값을 사용하여 아래 형식으로 표시하세요:
-			     - [TITLE](SOURCE)
-			   - 여러 문서가 있을 경우, 관련도가 높은 순으로 3개까지만 나열하세요.
-			
-			4. 문서 내용 요약이나 설명은 자연스럽고, 링크 섹션은 명확히 구분되도록 출력하세요.
-			
-			출력 형식 예시:
-			---
-			멀티스레드는 하나의 프로세스 안에서 여러 실행 흐름을 동시에 수행하는 기술입니다.
-			이를 통해 CPU 자원을 효율적으로 활용할 수 있으며, 병렬 처리가 필요한 상황에서 성능 향상을 기대할 수 있습니다.
-			
-			**관련 게시글**
-			- [자바 멀티스레드 기본 개념](https://baekqa.dev/posts/multithread-basic)
-			- [Thread 클래스와 Runnable 인터페이스 차이](https://baekqa.dev/posts/thread-vs-runnable)
-			---
+			당신은 '백과'의 블로그 콘텐츠를 기반으로 사용자의 질문에 답변하는 AI 어시턴트입니다.
+			당신의 모든 답변은 반드시 제공된 문서(검색 결과)에 기반해야 합니다.
 			""";
 
 		// 2. 검색된 문서 내용을 프롬프트에 포함
 		String context = buildRetrievalContext(retrievalResult);
-		String fullPrompt = systemPrompt + "\n\n[검색된 문서 내용]\n" + context;
+
+		String finalInstructions = """
+			[검색된 문서 내용]
+			%s
+			
+			[최종 지시 사항]
+			아래 규칙에 따라 Markdown 형식으로 가독성 높게 답변하세요.
+			
+			---
+			
+			## 🔒 절대 규칙
+			
+			1. **반드시 검색된 문서 내용에 기반하여 답하세요.**
+			   - 문서 내용에 없는 정보를 추측하거나 새로 만들어서는 안 됩니다.
+			   - 문서가 하나도 없다면 다음 문장을 그대로 출력하세요:
+			     - **"현재 백과 블로그에는 관련 게시글이 없습니다 🥲"**
+			
+			2. **답변 형식은 반드시 Markdown 규칙을 따르세요.**
+			   - 제목은 `##` 또는 `###`
+			   - 리스트는 `-`
+			   - 강조는 `**굵게**`
+			   - 필요하면 코드블록도 사용 가능
+			
+			3. **답변 구조는 다음 형식을 반드시 지키세요.**
+			
+			---
+			### 📌 요약
+			문서 내용을 기반으로 핵심을 간단히 2~3줄로 요약
+			
+			
+			### 📖 상세 설명
+			문서에서 얻은 지식을 기반으로 자연스럽고 명확하게 설명  
+			리스트, 강조, 표 등을 자유롭게 사용해 가독성 높게 작성
+			
+			### 🔗 관련 포스트
+			아래 형식으로 최대 3개 나열  
+			- [`TITLE`](SOURCE)
+			- [`TITLE`](SOURCE)
+			- [`TITLE`](SOURCE)
+			---
+			
+			4. 링크는 반드시 아래 형태로 출력하세요.
+			- `[TITLE](SOURCE)`
+			- 괄호나 URL 문자열이 깨지지 않도록 조심하세요.
+			
+			5. 절대 HTML 태그를 사용하지 말고, Markdown만 사용하세요.
+			
+			---
+			출력 예시:
+			---
+			### 📌 요약
+			멀티스레드는 하나의 프로세스 내부에서 여러 실행 흐름을 동시에 수행하는 기술입니다.
+			
+			### 📖 상세 설명
+			- 각 스레드는 **고유한 TCB 정보(스레드 ID, PC, 레지스터, 스택)** 를 가집니다.  
+			- 하지만 **코드/데이터/힙 영역은 공유**하므로 자원 접근이 빠르고 효율적입니다.  
+			- 단, 공유 자원 접근 시 동기화 문제가 발생할 수 있으므로 Mutex·Semaphore 등이 필요합니다.
+			
+			### 🔗 관련 포스트
+			- [자바 멀티스레드 기본 개념](https://baekqa.dev/posts/multithread-basic)
+			- [Thread 클래스와 Runnable 인터페이스 차이](https://baekqa.dev/posts/thread-vs-runnable)
+			- [멀티스레드 동기화 기초](https://baekqa.dev/posts/multithread-sync)
+			---
+			""";
+
+		String formattedInstructions = String.format(finalInstructions, context);
+		String fullPrompt = systemPrompt + formattedInstructions;
 
 		// 3. 메시지 구성
 		List<ChatMessage> messageList = List.of(
@@ -143,9 +184,12 @@ public class AiService {
 			@Override
 			public void onPartialResponse(String partialResponse) {
 				try {
+					Map<String, String> dataMap = Map.of("token", partialResponse);
+
 					emitter.send(SseEmitter.event()
 						.name("message")
-						.data(partialResponse));
+						.data(dataMap));
+
 				} catch (IOException disconnect) {
 					emitter.completeWithError(disconnect);
 				}
