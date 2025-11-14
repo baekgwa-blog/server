@@ -69,9 +69,13 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 				.map(tag -> tag.getName().toLowerCase())
 				.collect(Collectors.joining(","));
 
+			// Title 값을 사용해서 마크다운 형식의 링크로 만드는데, [] 가 있으면 재대로 처리되지 않음.
+			String originalTitle = post.getTitle();
+			String cleanedTitle = originalTitle.replaceAll("[\\[\\]]", ""); // "[" 와 "]"를 모두 제거
+
 			Metadata metadata = Metadata.from(Map.of(
 				ID, post.getId(),
-				TITLE, post.getTitle(),
+				TITLE, cleanedTitle,
 				SLUG, post.getSlug(),
 				CATEGORY, post.getCategory().getName().toLowerCase(),
 				TAGS, tags,
