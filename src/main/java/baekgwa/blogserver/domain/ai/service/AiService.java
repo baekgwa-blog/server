@@ -5,6 +5,7 @@ import static baekgwa.blogserver.infra.embedding.service.EmbeddingPostMetadataKe
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
-import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
-import baekgwa.blogserver.domain.ai.dto.RetrievalSearchRequest;
-import baekgwa.blogserver.global.exception.GlobalException;
-import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.infra.embedding.service.EmbeddingService;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
@@ -55,24 +52,13 @@ public class AiService {
 	private final PostTagRepository postTagRepository;
 	private final StreamingChatModel streamingChatModel;
 
-	public List<RetrievalResultDto> searchRetrievalPost(RetrievalSearchRequest request) {
-		EmbeddingSearchResult<TextSegment> searchResult =
-			embeddingService.searchRetrievalPost(request.getSentence(), request.getFilter());
-
-		return searchResult.matches().stream()
-			.map(match -> RetrievalResultDto.from(
-				match.score(),
-				match.embedded().text(),
-				match.embedded().metadata().toMap()
-			))
-			.toList();
-	}
-
 	@Transactional(readOnly = true)
 	public void embeddingPosts(EmbeddingPostRequest request) {
 		for (Long id : request.postIdList()) {
-			PostEntity findPost = postRepository.findById(id)
-				.orElseThrow(() -> new GlobalException(ErrorCode.INTERNAL_SERVER_ERROR));
+			Optional<PostEntity> findOptionalPost = postRepository.findById(id);
+			if (findOptionalPost.isEmpty())
+				continue;
+			PostEntity findPost = findOptionalPost.get();
 
 			List<PostTagEntity> findPostTagList = postTagRepository.findAllByPost(findPost);
 			List<TagEntity> findTagList = findPostTagList.stream().map(PostTagEntity::getTag).toList();
@@ -117,55 +103,59 @@ public class AiService {
 			
 			## 🔒 절대 규칙
 			
-			1. **반드시 검색된 문서 내용에 기반하여 답하세요.**
-			   - 문서 내용에 없는 정보를 추측하거나 새로 만들어서는 안 됩니다.
-			   - 문서가 하나도 없다면 다음 문장을 그대로 출력하세요:
-			     - **"현재 백과 블로그에는 관련 게시글이 없습니다 🥲"**
-			
-			2. **답변 형식은 반드시 Markdown 규칙을 따르세요.**
-			   - 제목은 `##` 또는 `###`
-			   - 리스트는 `-`
-			   - 강조는 `**굵게**`
-			   - 필요하면 코드블록도 사용 가능
-			
-			3. **답변 구조는 다음 형식을 반드시 지키세요.**
-			
-			---
-			### 📌 요약
-			문서 내용을 기반으로 핵심을 간단히 2~3줄로 요약
+			1. 반드시 검색된 문서 내용에 기반하여 답변하세요.
+			   문서 내용에 없는 정보는 절대 생성하거나 추측하지 마세요.
+			   문서가 없다면 다음 문장을 그대로 출력하세요:
+			   **"현재 백과 블로그에는 관련 포스팅이 없습니다 😔"**
 			
 			
-			### 📖 상세 설명
-			문서에서 얻은 지식을 기반으로 자연스럽고 명확하게 설명  
-			리스트, 강조, 표 등을 자유롭게 사용해 가독성 높게 작성
+			2. **모든 단락(문단)은 엔터 2번(= 빈 줄 1개)을 사용하여 구분해야 합니다.**
+			   즉, 단락과 단락 사이에는 반드시 **빈 줄이 한 줄 들어가야 합니다.**
+			   예)  
+			   문단 A 내용  
 			
-			### 🔗 관련 포스트
-			아래 형식으로 최대 3개 나열  
-			- [`TITLE`](SOURCE)
-			- [`TITLE`](SOURCE)
-			- [`TITLE`](SOURCE)
-			---
+			   문단 B 내용  
 			
-			4. 링크는 반드시 아래 형태로 출력하세요.
-			- `[TITLE](SOURCE)`
-			- 괄호나 URL 문자열이 깨지지 않도록 조심하세요.
+			   문단 C 내용
 			
-			5. 절대 HTML 태그를 사용하지 말고, Markdown만 사용하세요.
+			
+			3. **Markdown을 적극적으로 사용하여 가독성을 높이세요.**
+			   - 제목: `##`, `###`
+			   - 리스트: `-`
+			   - 강조: `**굵게**`
+			   - 필요 시 코드블록도 사용 가능
+			
+			
+			4. 답변은 아래 구조를 반드시 따르세요:
 			
 			---
+			### 📌 요약  
+			(문서 기반 핵심 요약 2~3줄)
+			
+			
+			### 🔗 관련 포스트  
+			아래 형식으로 최대 3개  
+			- [`TITLE`](SOURCE)  
+			- [`TITLE`](SOURCE)  
+			- [`TITLE`](SOURCE)
+			---
+			
+			
+			5. 링크는 반드시 다음 형태를 지켜야 합니다.  
+			`[TITLE](SOURCE)`  
+			절대 깨뜨리지 마세요.
+			
+			---
+			
 			출력 예시:
 			---
-			### 📌 요약
+			### 📌 요약  
 			멀티스레드는 하나의 프로세스 내부에서 여러 실행 흐름을 동시에 수행하는 기술입니다.
 			
-			### 📖 상세 설명
-			- 각 스레드는 **고유한 TCB 정보(스레드 ID, PC, 레지스터, 스택)** 를 가집니다.  
-			- 하지만 **코드/데이터/힙 영역은 공유**하므로 자원 접근이 빠르고 효율적입니다.  
-			- 단, 공유 자원 접근 시 동기화 문제가 발생할 수 있으므로 Mutex·Semaphore 등이 필요합니다.
 			
-			### 🔗 관련 포스트
-			- [자바 멀티스레드 기본 개념](https://baekqa.dev/posts/multithread-basic)
-			- [Thread 클래스와 Runnable 인터페이스 차이](https://baekqa.dev/posts/thread-vs-runnable)
+			### 🔗 관련 포스트  
+			- [자바 멀티스레드 기본 개념](https://baekqa.dev/posts/multithread-basic)  
+			- [Thread 클래스와 Runnable 인터페이스 차이](https://baekqa.dev/posts/thread-vs-runnable)  
 			- [멀티스레드 동기화 기초](https://baekqa.dev/posts/multithread-sync)
 			---
 			""";

@@ -1,7 +1,5 @@
 package baekgwa.blogserver.domain.ai.controller;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,8 +8,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
-import baekgwa.blogserver.domain.ai.dto.RetrievalResultDto;
-import baekgwa.blogserver.domain.ai.dto.RetrievalSearchRequest;
 import baekgwa.blogserver.domain.ai.service.AiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,14 +41,6 @@ public class AiController {
 		SseEmitter emitter = new SseEmitter(60_000L);
 		aiService.searchPosts(request, emitter);
 		return emitter;
-	}
-
-	@PostMapping("/search")
-	@Operation(summary = "검색어와 유사한 문서 조회 (Retrieval)")
-	public List<RetrievalResultDto> searchRetrieval(
-		@Valid @RequestBody RetrievalSearchRequest request
-	) {
-		return aiService.searchRetrievalPost(request);
 	}
 
 	@PostMapping("/post/embedding")
