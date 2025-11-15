@@ -2,7 +2,9 @@ package baekgwa.blogserver.infra.embedding.service;
 
 import static baekgwa.blogserver.infra.embedding.service.EmbeddingPostMetadataKeys.*;
 
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,6 +71,12 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			String originalTitle = post.getTitle();
 			String cleanedTitle = originalTitle.replaceAll("[\\[\\]]", ""); // "[" 와 "]"를 모두 제거
 
+			// UTC 기준 ISO 8601 생성 (간단하게)
+			String createdAtUtc = post.getCreatedAt()
+				.atZone(ZoneId.of("Asia/Seoul"))  // KST 기준 LocalDateTime → ZonedDateTime
+				.withZoneSameInstant(ZoneOffset.UTC) // UTC 기준으로 변환
+				.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME); // "2025-11-15T16:46:12Z" 형태
+
 			Metadata metadata = Metadata.from(Map.of(
 				ID, post.getId(),
 				TITLE, cleanedTitle,
@@ -76,8 +84,8 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 				CATEGORY, post.getCategory().getName().toLowerCase(),
 				TAGS, tags,
 				DESCRIPTION, post.getDescription(),
-				CREATED_AT, post.getCreatedAt().atOffset(ZoneOffset.UTC).toString(),
 				//logstash 로 변환해서 넣지 않기 때문에, utc-0 기준으로 created_at 생성 필요.
+				CREATED_AT, createdAtUtc,
 				SOURCE, generateOriginSource(urlProperties.getFrontend(), post.getSlug())
 			));
 
