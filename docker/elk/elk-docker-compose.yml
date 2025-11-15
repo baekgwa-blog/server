@@ -5,7 +5,7 @@ services:
     networks:
       - baekgwa-network
     ports:
-      - "9200:9200"
+      - ${ELASTIC_SEARCH_PORT}:9200
     volumes:
       - es-data:/usr/share/elasticsearch/data
     environment:
@@ -21,7 +21,7 @@ services:
     networks:
       - baekgwa-network
     ports:
-      - "5601:5601"
+      - ${KIBANA_PORT}:5601
     volumes:
       - kibana-data:/usr/share/kibana/data
     environment:
@@ -36,7 +36,7 @@ services:
     networks:
       - baekgwa-network
     ports:
-      - "5044:5044" #Logback TCP 입력 포트
+      - ${LOGSTASH_PORT}:5044 #Logback TCP 입력 포트
     volumes:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     environment:
