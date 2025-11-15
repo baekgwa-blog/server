@@ -27,6 +27,4 @@ public interface EmbeddingService {
 	EmbeddingSearchResult<TextSegment> searchRetrievalPost(String sentence, @NonNull List<String> filter);
 
 	void deleteEmbeddingPost(Long postId);
-
-	void updateEmbeddingPost(PostEntity post, List<TagEntity> tagList);
 }

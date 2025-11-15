@@ -14,6 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
 import baekgwa.blogserver.infra.embedding.service.EmbeddingService;
+import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
+import baekgwa.blogserver.model.embedding.entity.EmbeddingJob;
+import baekgwa.blogserver.model.embedding.repository.EmbeddingFailureRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.entity.PostTagEntity;
@@ -50,8 +53,14 @@ public class AiService {
 	private final EmbeddingService embeddingService;
 	private final PostRepository postRepository;
 	private final PostTagRepository postTagRepository;
+	private final EmbeddingFailureRepository embeddingFailureRepository;
 	private final StreamingChatModel streamingChatModel;
 
+	/**
+	 * 수동으로, 특정 포스팅 임베딩 후 db 저장
+	 * elk 신규 업데이트 후, 기존 document 가 누락되어 있는 경우 사용
+	 * @param request
+	 */
 	@Transactional(readOnly = true)
 	public void embeddingPosts(EmbeddingPostRequest request) {
 		for (Long id : request.postIdList()) {
@@ -62,7 +71,14 @@ public class AiService {
 
 			List<PostTagEntity> findPostTagList = postTagRepository.findAllByPost(findPost);
 			List<TagEntity> findTagList = findPostTagList.stream().map(PostTagEntity::getTag).toList();
-			embeddingService.createEmbeddingPost(findPost, findTagList);
+
+			try {
+				embeddingService.createEmbeddingPost(findPost, findTagList);
+			} catch (Exception e) {
+				EmbeddingFailureEntity failure =
+					EmbeddingFailureEntity.of(findPost.getId(), e.getMessage(), EmbeddingJob.CREATE);
+				embeddingFailureRepository.save(failure);
+			}
 		}
 	}
 

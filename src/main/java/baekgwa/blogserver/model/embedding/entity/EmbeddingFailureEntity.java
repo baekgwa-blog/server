@@ -54,4 +54,8 @@ public class EmbeddingFailureEntity extends TemporalEntity {
 	public static EmbeddingFailureEntity of(Long postId, String reason, EmbeddingJob embeddingJob) {
 		return new EmbeddingFailureEntity(postId, embeddingJob, reason);
 	}
+
+	public void updateReason(String reason) {
+		this.reason = reason;
+	}
 }

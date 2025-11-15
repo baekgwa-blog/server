@@ -2,6 +2,7 @@ package baekgwa.blogserver.infra.embedding.service;
 
 import static baekgwa.blogserver.infra.embedding.service.EmbeddingPostMetadataKeys.*;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,9 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import baekgwa.blogserver.global.environment.UrlProperties;
-import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
-import baekgwa.blogserver.model.embedding.entity.EmbeddingJob;
-import baekgwa.blogserver.model.embedding.repository.EmbeddingFailureRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import dev.langchain4j.data.document.Document;
@@ -49,11 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 public class EmbeddingOpenAiService implements EmbeddingService {
 
 	private final EmbeddingModel embeddingModel;
-	private final EmbeddingFailureRepository embeddingFailureRepository;
 	private final EmbeddingStore<TextSegment> embeddingStore;
 	private final UrlProperties urlProperties;
 
-	// TODO : 실패 복구 전략 추가할 것.
 	@Override
 	public void createEmbeddingPost(PostEntity post, List<TagEntity> tagList) {
 		log.debug("Create embedding for postId={}", post.getId());
@@ -80,7 +76,8 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 				CATEGORY, post.getCategory().getName().toLowerCase(),
 				TAGS, tags,
 				DESCRIPTION, post.getDescription(),
-				CREATED_AT, post.getCreatedAt().toString(),
+				CREATED_AT, post.getCreatedAt().atOffset(ZoneOffset.UTC).toString(),
+				//logstash 로 변환해서 넣지 않기 때문에, utc-0 기준으로 created_at 생성 필요.
 				SOURCE, generateOriginSource(urlProperties.getFrontend(), post.getSlug())
 			));
 
@@ -103,9 +100,6 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 
 		} catch (Exception e) {
 			log.warn("Embedding failed for postId={}: {}", post.getId(), e.getMessage());
-			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(post.getId(), e.getMessage(),
-				EmbeddingJob.CREATE);
-			embeddingFailureRepository.save(failure);
 			throw e;
 		}
 	}
@@ -161,23 +155,9 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 			embeddingStore.removeAll(filter);
 			log.debug("Successfully deleted embedding for postId={}", postId);
 		} catch (Exception e) {
-			EmbeddingFailureEntity failure = EmbeddingFailureEntity.of(postId, e.getMessage(), EmbeddingJob.DELETE);
-			embeddingFailureRepository.save(failure);
 			log.error("Failed to delete embedding for postId={}: {}", postId, e.getMessage());
 			throw e;
 		}
-	}
-
-	@Override
-	public void updateEmbeddingPost(PostEntity post, List<TagEntity> tagList) {
-		log.debug("Updating embedding for postId={}", post.getId());
-
-		// 1. 메타데이터 기반 삭제 처리
-		deleteEmbeddingPost(post.getId());
-
-		// 2. 신규 포스트 등록
-		createEmbeddingPost(post, tagList);
-		log.debug("Successfully updating embedding for postId={}", post.getId());
 	}
 
 	private String generateOriginSource(String feUrl, String slug) {
