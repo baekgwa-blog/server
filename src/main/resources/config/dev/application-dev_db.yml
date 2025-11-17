@@ -40,3 +40,6 @@ redis:
 elasticsearch:
   url: ${ELASTIC_SEARCH_URL}
   embeddingIndexName: ${ELASTIC_SEARCH_EMBEDDING_INDEX}
+
+logstash:
+  url: ${LOGSTASH_URL}

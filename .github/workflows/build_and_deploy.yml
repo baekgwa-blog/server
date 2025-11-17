@@ -75,6 +75,7 @@ jobs:
               -e OPENAI_EMBEDDING_MODEL_NAME=${{ secrets.OPENAI_EMBEDDING_MODEL_NAME }} \
               -e OPENAI_LLM_MODEL_NAME=${{ secrets.OPENAI_LLM_MODEL_NAME }} \
               -e ELASTIC_SEARCH_URL=${{ secrets.ELASTIC_SEARCH_URL }} \
+              -e LOGSTASH_URL=${{ secrets.LOGSTASH_URL }} \
               -e ELASTIC_SEARCH_EMBEDDING_INDEX=${{ secrets.ELASTIC_SEARCH_EMBEDDING_INDEX }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
