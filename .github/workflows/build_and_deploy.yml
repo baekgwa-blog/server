@@ -70,6 +70,11 @@ jobs:
               -e S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
               -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
               -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-              -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+              -e REDIS_PORT=${{ secrets.OPENAI_API_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e OPENAI_EMBEDDING_MODEL_NAME=${{ secrets.OPENAI_EMBEDDING_MODEL_NAME }} \
+              -e OPENAI_LLM_MODEL_NAME=${{ secrets.OPENAI_LLM_MODEL_NAME }} \
+              -e ELASTIC_SEARCH_URL=${{ secrets.ELASTIC_SEARCH_URL }} \
+              -e ELASTIC_SEARCH_EMBEDDING_INDEX=${{ secrets.ELASTIC_SEARCH_EMBEDDING_INDEX }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
