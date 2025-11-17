@@ -61,7 +61,7 @@ public class AiService {
 	 * elk 신규 업데이트 후, 기존 document 가 누락되어 있는 경우 사용
 	 * @param request
 	 */
-	@Transactional(readOnly = true)
+	@Transactional
 	public void embeddingPosts(EmbeddingPostRequest request) {
 		for (Long id : request.postIdList()) {
 			Optional<PostEntity> findOptionalPost = postRepository.findById(id);

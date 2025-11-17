@@ -154,6 +154,7 @@ jacocoTestCoverageVerification {
                     'baekgwa/blogserver/global/**',
                     'baekgwa/blogserver/infra/**',
                     'baekgwa/blogserver/BlogServerApplication.class',
+                    'baekgwa/blogserver/domain/ai/**',
                     '**/Q*'
             ])
         }))

@@ -30,5 +30,9 @@ public class AiRequest {
 		@NotBlank
 		private String sentence;
 		private List<String> filter = new ArrayList<>();
+
+		public static AiSearchPost of(String sentence, List<String> filter) {
+			return new AiSearchPost(sentence, filter);
+		}
 	}
 }
