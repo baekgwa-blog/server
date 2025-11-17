@@ -74,7 +74,7 @@ jobs:
               -e S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
               -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
               -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-              -e REDIS_PORT=${{ secrets.OPENAI_API_KEY }} \
+              -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               -e OPENAI_EMBEDDING_MODEL_NAME=${{ secrets.OPENAI_EMBEDDING_MODEL_NAME }} \
               -e OPENAI_LLM_MODEL_NAME=${{ secrets.OPENAI_LLM_MODEL_NAME }} \
