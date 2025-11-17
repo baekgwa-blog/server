@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
@@ -28,6 +29,7 @@ public class TagDataFactory {
 	private final TagRepository tagRepository;
 	private final EntityManager em;
 
+	@Transactional
 	public List<TagEntity> newTagList(final long count) {
 		if (count <= 0) {
 			throw new IllegalArgumentException("1개 이상 입력되어야 합니다.");
