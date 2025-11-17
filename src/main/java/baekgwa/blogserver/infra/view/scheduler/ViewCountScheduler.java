@@ -2,6 +2,7 @@ package baekgwa.blogserver.infra.view.scheduler;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 4.     Baekgwa               Initial creation
  */
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class ViewCountScheduler {

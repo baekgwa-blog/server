@@ -2,6 +2,7 @@ package baekgwa.blogserver.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import baekgwa.blogserver.global.environment.OpenAiProperties;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 7.     Baekgwa               Initial creation
  */
+@Profile("!test")
 @Configuration
 @RequiredArgsConstructor
 public class OpenAiConfig {

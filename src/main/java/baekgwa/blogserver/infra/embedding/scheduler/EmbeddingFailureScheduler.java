@@ -2,6 +2,7 @@ package baekgwa.blogserver.infra.embedding.scheduler;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 15.     Baekgwa               Initial creation
  */
+@Profile("!test")
 @Slf4j
 @Component
 @RequiredArgsConstructor

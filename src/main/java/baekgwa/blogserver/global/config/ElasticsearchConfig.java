@@ -9,6 +9,7 @@ import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import baekgwa.blogserver.global.environment.ElasticSearchProperties;
 import dev.langchain4j.data.segment.TextSegment;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 10.     Baekgwa               Initial creation
  */
+@Profile("!test")
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
