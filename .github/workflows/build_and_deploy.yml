@@ -81,5 +81,7 @@ jobs:
               -e ELASTIC_SEARCH_URL=${{ secrets.ELASTIC_SEARCH_URL }} \
               -e LOGSTASH_URL=${{ secrets.LOGSTASH_URL }} \
               -e ELASTIC_SEARCH_EMBEDDING_INDEX=${{ secrets.ELASTIC_SEARCH_EMBEDDING_INDEX }} \
+              -e ELASTIC_SEARCH_USERNAME=${{ secrets.ELASTIC_SEARCH_USERNAME }} \
+              -e ELASTIC_SEARCH_PASSWORD=${{ secrets.ELASTIC_SEARCH_PASSWORD }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
