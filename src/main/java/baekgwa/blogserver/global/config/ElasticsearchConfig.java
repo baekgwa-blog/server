@@ -3,6 +3,9 @@ package baekgwa.blogserver.global.config;
 import java.io.IOException;
 
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
@@ -39,8 +42,20 @@ public class ElasticsearchConfig {
 
 	@Bean
 	public EmbeddingStore<TextSegment> embeddingStore() throws IOException {
+		log.info("🚀 Loading Standard Elasticsearch RestClient...");
+
+		final BasicCredentialsProvider credential = new BasicCredentialsProvider();
+		credential.setCredentials(AuthScope.ANY,
+			new UsernamePasswordCredentials(
+				elasticSearchProperties.getUsername(),
+				elasticSearchProperties.getPassword()
+			)
+		);
+
 		RestClient restClient = RestClient
 			.builder(HttpHost.create(elasticSearchProperties.getUrl()))
+			.setHttpClientConfigCallback(
+				httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credential))
 			.build();
 
 		ensureIndexExists(restClient, elasticSearchProperties.getEmbeddingIndexName());
@@ -48,7 +63,6 @@ public class ElasticsearchConfig {
 		return ElasticsearchEmbeddingStore
 			.builder()
 			.indexName(elasticSearchProperties.getEmbeddingIndexName())
-			// .dimension() // deprecated
 			.restClient(restClient)
 			.build();
 	}

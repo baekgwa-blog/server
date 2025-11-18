@@ -32,8 +32,3 @@ spring:
 url:
   frontend: ${FRONTEND_URL}
   backend: ${API_SERVER_URL}
-
-management:
-  endpoint:
-    health:
-      show-details=always:

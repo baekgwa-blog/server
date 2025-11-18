@@ -24,4 +24,6 @@ import lombok.Setter;
 public class ElasticSearchProperties {
 	private String url;
 	private String embeddingIndexName;
+	private String username;
+	private String password;
 }
