@@ -1,0 +1,79 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.0
+    container_name: elasticsearch
+    networks:
+      - baekgwa-network
+    ports:
+      - ${ELASTIC_SEARCH_PORT}:9200
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+      - ./elastic/init-kibana-user.sh:/usr/share/elasticsearch/config/init/init-kibana-user.sh
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - KIBANA_USERNAME=${KIBANA_USERNAME} # Kibana -> Elastic 접속을 위한 회원 아이디
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD} # Kibana -> Elastic 접속을 위한 회원 비밀번호
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "bash /usr/share/elasticsearch/config/init/init-kibana-user.sh && /usr/local/bin/docker-entrypoint.sh"
+      ]
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -f -u elastic:${ELASTICSEARCH_PASSWORD} http://localhost:9200/_cluster/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.2.0
+    container_name: kibana
+    networks:
+      - baekgwa-network
+    ports:
+      - ${KIBANA_PORT}:5601
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - ELASTICSEARCH_USERNAME=${KIBANA_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - SERVER_PUBLICBASEURL=https://kibana.baekgwa.site
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.2.0
+    container_name: logstash
+    networks:
+      - baekgwa-network
+    ports:
+      - ${LOGSTASH_PORT}:5044
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      - LS_JAVA_OPTS=-Xms1g -Xmx1g
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+    restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  es-data:
+    driver: local
+  kibana-data:
+    driver: local
+
+networks:
+  baekgwa-network:
+    external: true

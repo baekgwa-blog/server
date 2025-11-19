@@ -18,6 +18,10 @@ spring:
     enabled: true
     baseline-on-migrate: false
     locations: classpath:db/migration, classpath:db/seed
+  elasticsearch:
+    uris: ${ELASTIC_SEARCH_URL}
+    username: ${ELASTIC_SEARCH_USERNAME}
+    password: ${ELASTIC_SEARCH_PASSWORD}
 
 decorator:
   datasource:
@@ -36,3 +40,12 @@ redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}
   password: ${REDIS_PASSWORD}
+
+elasticsearch:
+  url: ${ELASTIC_SEARCH_URL}
+  username: ${ELASTIC_SEARCH_USERNAME}
+  password: ${ELASTIC_SEARCH_PASSWORD}
+  embeddingIndexName: ${ELASTIC_SEARCH_EMBEDDING_INDEX}
+
+logstash:
+  url: ${LOGSTASH_URL}

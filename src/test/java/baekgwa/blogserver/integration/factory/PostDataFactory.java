@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
@@ -33,6 +34,7 @@ public class PostDataFactory {
 	private final PostTagRepository postTagRepository;
 	private final EntityManager em;
 
+	@Transactional
 	public List<PostEntity> newPostList(final long count, List<TagEntity> saveTagList, CategoryEntity saveCategory) {
 
 		if (count <= 0) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
@@ -28,6 +29,7 @@ public class CategoryDataFactory {
 	private final CategoryRepository categoryRepository;
 	private final EntityManager em;
 
+	@Transactional
 	public List<CategoryEntity> newCategoryList(final long count) {
 
 		if (count <= 0) {

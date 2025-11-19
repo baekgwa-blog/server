@@ -83,6 +83,14 @@ dependencies {
     // Jsoup
     implementation 'org.jsoup:jsoup:1.17.2'
 
+    // LogStash encoder
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
+
+    // LangChain4J
+    implementation 'dev.langchain4j:langchain4j:1.8.0'
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.8.0'
+    implementation 'dev.langchain4j:langchain4j-elasticsearch:1.8.0-beta15'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -146,6 +154,7 @@ jacocoTestCoverageVerification {
                     'baekgwa/blogserver/global/**',
                     'baekgwa/blogserver/infra/**',
                     'baekgwa/blogserver/BlogServerApplication.class',
+                    'baekgwa/blogserver/domain/ai/**',
                     '**/Q*'
             ])
         }))

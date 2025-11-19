@@ -71,5 +71,13 @@ jobs:
               -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
               -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
               -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e OPENAI_EMBEDDING_MODEL_NAME=${{ secrets.OPENAI_EMBEDDING_MODEL_NAME }} \
+              -e OPENAI_LLM_MODEL_NAME=${{ secrets.OPENAI_LLM_MODEL_NAME }} \
+              -e ELASTIC_SEARCH_URL=${{ secrets.ELASTIC_SEARCH_URL }} \
+              -e LOGSTASH_URL=${{ secrets.LOGSTASH_URL }} \
+              -e ELASTIC_SEARCH_EMBEDDING_INDEX=${{ secrets.ELASTIC_SEARCH_EMBEDDING_INDEX }} \
+              -e ELASTIC_SEARCH_USERNAME=${{ secrets.ELASTIC_SEARCH_USERNAME }} \
+              -e ELASTIC_SEARCH_PASSWORD=${{ secrets.ELASTIC_SEARCH_PASSWORD }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
