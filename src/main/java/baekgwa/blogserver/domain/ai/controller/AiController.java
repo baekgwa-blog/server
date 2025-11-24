@@ -1,5 +1,6 @@
 package baekgwa.blogserver.domain.ai.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
+import baekgwa.blogserver.domain.ai.dto.AiResponse;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
 import baekgwa.blogserver.domain.ai.service.AiService;
 import baekgwa.blogserver.global.response.BaseResponse;
@@ -52,5 +54,12 @@ public class AiController {
 	) {
 		aiService.embeddingPosts(request);
 		return BaseResponse.success(SuccessCode.EMBEDDING_POST_SUCCESS);
+	}
+
+	@GetMapping("/health")
+	@Operation(summary = "백과 블로그 Chatbot 사용 가능 상태 확인")
+	public BaseResponse<AiResponse.AiHealthCheck> chatbotHealthCheck() {
+		AiResponse.AiHealthCheck response = aiService.healthCheck();
+		return BaseResponse.success(SuccessCode.ENABLE_CHAT_BOT, response);
 	}
 }
