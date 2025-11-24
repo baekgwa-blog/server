@@ -9,6 +9,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
 import baekgwa.blogserver.domain.ai.service.AiService;
+import baekgwa.blogserver.global.response.BaseResponse;
+import baekgwa.blogserver.global.response.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -45,9 +47,10 @@ public class AiController {
 
 	@PostMapping("/post/embedding")
 	@Operation(summary = "수동 post embedding 후, vector db 에 저장")
-	public void embeddingPost(
+	public BaseResponse<Void> embeddingPost(
 		@RequestBody EmbeddingPostRequest request
 	) {
 		aiService.embeddingPosts(request);
+		return BaseResponse.success(SuccessCode.EMBEDDING_POST_SUCCESS);
 	}
 }
