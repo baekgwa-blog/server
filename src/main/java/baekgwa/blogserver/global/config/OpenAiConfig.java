@@ -51,7 +51,7 @@ public class OpenAiConfig {
 			.build();
 	}
 
-	@Bean
+	@Bean(name = "openAiRestTemplate")
 	public RestTemplate openAiRestTemplate(RestTemplateBuilder builder) {
 		return builder
 			.rootUri("https://api.openai.com/v1")

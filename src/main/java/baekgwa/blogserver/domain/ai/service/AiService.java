@@ -12,6 +12,7 @@ import java.util.concurrent.Executor;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,7 @@ public class AiService {
 
 	private final Executor taskExecutor;
 	private final RestClient elasticSearchRestClient;
+	@Qualifier("openAiRestTemplate")
 	private final RestTemplate openAiRestTemplate;
 
 	/**
