@@ -48,6 +48,10 @@ public enum SuccessCode {
 	MODIFY_STACK_SUCCESS(HttpStatus.OK, "스택 내용 수정 성공"),
 	GET_MODIFY_STACK_INFO_SUCCESS(HttpStatus.OK, "스택 내용 조회 성공"),
 
+	//AI
+	EMBEDDING_POST_SUCCESS(HttpStatus.CREATED, "게시글 임베딩 성공"),
+	ENABLE_CHAT_BOT(HttpStatus.OK, "Chatbot health check 성공"),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 

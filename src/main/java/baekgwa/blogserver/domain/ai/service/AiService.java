@@ -6,12 +6,21 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
+import baekgwa.blogserver.domain.ai.dto.AiResponse;
 import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
 import baekgwa.blogserver.infra.embedding.service.EmbeddingService;
 import baekgwa.blogserver.model.embedding.entity.EmbeddingFailureEntity;
@@ -55,6 +64,11 @@ public class AiService {
 	private final PostTagRepository postTagRepository;
 	private final EmbeddingFailureRepository embeddingFailureRepository;
 	private final StreamingChatModel streamingChatModel;
+
+	private final Executor taskExecutor;
+	private final RestClient elasticSearchRestClient;
+	@Qualifier("openAiRestTemplate")
+	private final RestTemplate openAiRestTemplate;
 
 	/**
 	 * 수동으로, 특정 포스팅 임베딩 후 db 저장
@@ -236,5 +250,61 @@ public class AiService {
 				.append(segment.text()).append("\n\n");
 		}
 		return sb.toString();
+	}
+
+	public AiResponse.AiHealthCheck healthCheck() {
+		// 1. elk connection check
+		CompletableFuture<AiResponse.HealthStatus> dbFuture = CompletableFuture.supplyAsync(
+			this::checkElkConnection,
+			taskExecutor
+		);
+
+		// 2. llm connection check
+		CompletableFuture<AiResponse.HealthStatus> llmFuture = CompletableFuture.supplyAsync(
+			this::checkOpenAiConnection,
+			taskExecutor
+		);
+
+		AiResponse.HealthStatus dbStatus = dbFuture.join();
+		AiResponse.HealthStatus llmStatus = llmFuture.join();
+		boolean isAvailable =
+			(dbStatus == AiResponse.HealthStatus.UP) && (llmStatus == AiResponse.HealthStatus.UP);
+
+		return AiResponse.AiHealthCheck.builder()
+			.database(dbStatus)
+			.llm(llmStatus)
+			.isAvailable(isAvailable)
+			.build();
+	}
+
+	private AiResponse.HealthStatus checkElkConnection() {
+		try {
+			Response response = elasticSearchRestClient.performRequest(new Request("HEAD", "/"));
+
+			log.debug("[HealthCheck] VectorDB Connection Success");
+
+			return response.getStatusLine().getStatusCode() == 200 ?
+				AiResponse.HealthStatus.UP :
+				AiResponse.HealthStatus.DOWN;
+		} catch (Exception e) {
+			log.debug("[HealthCheck] ELK Connection Failed: {}", e.getMessage());
+			return AiResponse.HealthStatus.DOWN;
+		}
+	}
+
+	private AiResponse.HealthStatus checkOpenAiConnection() {
+		try {
+			// models 를 호출해서 연결이 가능한지 확인. 이게 제일 저렴
+			ResponseEntity<String> response = openAiRestTemplate.getForEntity("/models", String.class);
+
+			log.debug("[HealthCheck] OpenAI Connection Success");
+
+			return response.getStatusCode().is2xxSuccessful() ?
+				AiResponse.HealthStatus.UP :
+				AiResponse.HealthStatus.DOWN;
+		} catch (Exception e) {
+			log.debug("[HealthCheck] OpenAI Connection Failed: {}", e.getMessage());
+			return AiResponse.HealthStatus.DOWN;
+		}
 	}
 }

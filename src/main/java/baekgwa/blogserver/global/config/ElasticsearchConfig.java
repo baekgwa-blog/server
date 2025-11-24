@@ -41,7 +41,18 @@ public class ElasticsearchConfig {
 	private final ElasticSearchProperties elasticSearchProperties;
 
 	@Bean
-	public EmbeddingStore<TextSegment> embeddingStore() throws IOException {
+	public EmbeddingStore<TextSegment> embeddingStore(RestClient restClient) throws IOException {
+		ensureIndexExists(restClient, elasticSearchProperties.getEmbeddingIndexName());
+
+		return ElasticsearchEmbeddingStore
+			.builder()
+			.indexName(elasticSearchProperties.getEmbeddingIndexName())
+			.restClient(restClient)
+			.build();
+	}
+
+	@Bean
+	public RestClient elasticsearchRestClient() {
 		log.info("🚀 Loading Standard Elasticsearch RestClient...");
 
 		final BasicCredentialsProvider credential = new BasicCredentialsProvider();
@@ -52,18 +63,10 @@ public class ElasticsearchConfig {
 			)
 		);
 
-		RestClient restClient = RestClient
+		return RestClient
 			.builder(HttpHost.create(elasticSearchProperties.getUrl()))
 			.setHttpClientConfigCallback(
 				httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credential))
-			.build();
-
-		ensureIndexExists(restClient, elasticSearchProperties.getEmbeddingIndexName());
-
-		return ElasticsearchEmbeddingStore
-			.builder()
-			.indexName(elasticSearchProperties.getEmbeddingIndexName())
-			.restClient(restClient)
 			.build();
 	}
 
