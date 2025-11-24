@@ -104,8 +104,7 @@ public class EmbeddingOpenAiService implements EmbeddingService {
 
 			// 5. Vector DB(Elasticsearch) 저장
 			embeddingStore.addAll(embeddingResponse.content(), textSegmentList);
-			log.debug("Successfully embedded and stored postId={}", post.getId());
-
+			log.info("Successfully embedded and stored postId={}, title={}", post.getId(), post.getTitle());
 		} catch (Exception e) {
 			log.warn("Embedding failed for postId={}: {}", post.getId(), e.getMessage());
 			throw e;
