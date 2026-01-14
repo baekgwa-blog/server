@@ -18,7 +18,8 @@ WORKDIR /app
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+COPY --from=docker.elastic.co/observability/apm-agent-java:latest /usr/agent/elastic-apm-agent.jar /elastic-apm-agent.jar
 COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar", "--spring.profiles.active=prod"]
+ENTRYPOINT ["sh", "-c", "exec java -javaagent:/elastic-apm-agent.jar -Duser.timezone=Asia/Seoul -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod}"]

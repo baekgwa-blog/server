@@ -79,5 +79,12 @@ jobs:
               -e ELASTIC_SEARCH_EMBEDDING_INDEX=${{ secrets.ELASTIC_SEARCH_EMBEDDING_INDEX }} \
               -e ELASTIC_SEARCH_USERNAME=${{ secrets.ELASTIC_SEARCH_USERNAME }} \
               -e ELASTIC_SEARCH_PASSWORD=${{ secrets.ELASTIC_SEARCH_PASSWORD }} \
+              -e ELASTIC_APM_SERVICE_NAME=baekgwa-blog-server \
+              -e ELASTIC_APM_ENVIRONMENT=prod \
+              -e ELASTIC_APM_SERVER_URL=${{ secrets.ELASTIC_APM_SERVER_URL }} \
+              -e ELASTIC_APM_SECRET_TOKEN=${{ secrets.ELASTIC_APM_SECRET_TOKEN }} \
+              -e ELASTIC_APM_APPLICATION_PACKAGES=baekgwa.blogserver \
+              -e ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES=true \
+              -e ELASTIC_APM_SPAN_STACK_TRACE_MIN_DURATION=5ms \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest

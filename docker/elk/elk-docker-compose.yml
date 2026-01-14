@@ -15,7 +15,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
-      - KIBANA_USERNAME=${KIBANA_USERNAME} # Kibana -> Elastic 접속을 위한 회원 아이디
+      - KIBANA_USERNAME=${KIBANA_USERNAME} # Kibana -> Elastic 접속을 위한 회원 아이디, 기존 elastic system 계정을 사용하는 방법은 막힘
       - KIBANA_PASSWORD=${KIBANA_PASSWORD} # Kibana -> Elastic 접속을 위한 회원 비밀번호
     entrypoint:
       [
@@ -41,9 +41,11 @@ services:
       - kibana-data:/usr/share/kibana/data
     environment:
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
+      # Kibana -> Elastic 으로 접속할 떄 사용할 유저는, "kibana_system" 권한을 가지고 있는 새로 만든 유저
       - ELASTICSEARCH_USERNAME=${KIBANA_USERNAME}
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - SERVER_PUBLICBASEURL=https://kibana.baekgwa.site
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY}
     restart: always
     depends_on:
       elasticsearch:
@@ -67,6 +69,30 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+
+  elastic-agent:
+    image: docker.elastic.co/elastic-agent/elastic-agent:9.2.3
+    container_name: elastic-agent
+    networks:
+      - baekgwa-network
+    ports:
+      - "8220:8220"   # Fleet Server
+      - "8200:8200"   # APM intake
+    environment:
+      - FLEET_SERVER_ENABLE=true
+      - FLEET_SERVER_ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - FLEET_SERVER_POLICY_ID=fleet-server-policy
+      - FLEET_URL=http://elastic-agent:8220 #내부 agent 들이 fleet 서버를 바라볼 주소. 현재 동일 elastic-agent container 로 관리하기 때문에, 본인 스스로 지칭
+      - FLEET_SERVER_INSECURE_HTTP=true
+      - FLEET_SERVER_SERVICE_TOKEN=${FLEET_SERVER_SERVICE_TOKEN}
+      - FLEET_ENROLLMENT_TOKEN=${FLEET_ENROLLMENT_TOKEN}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_started
+    restart: always
 
 volumes:
   es-data:
