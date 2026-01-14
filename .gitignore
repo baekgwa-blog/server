@@ -44,3 +44,6 @@ out/
 
 ### application logs ###
 /logs/
+
+### local docker up env ###
+/docker/application/.env.local
