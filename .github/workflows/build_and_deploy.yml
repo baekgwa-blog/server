@@ -1,19 +1,15 @@
 name: Deploy Spring Boot to EC2 with Docker
 
-#on:
-#  push:
-#    branches:
-#      - main
-#    paths:
-#      - 'src/**'
-#      - 'build.gradle'
-#      - 'settings.gradle'
-#      - 'gradle/**'
-#      - 'Dockerfile'
-
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle/**'
+      - 'Dockerfile'
 
 jobs:
   build-and-deploy:
