@@ -57,6 +57,7 @@ jobs:
             docker run -d --name baekgwa-server \
               --restart always \
               --network baekgwa-network \
+              -e SPRING_PROFILES_ACTIVE=prod \
               -e RDBMS_URL=${{ secrets.RDBMS_URL }} \
               -e RDBMS_USERNAME=${{ secrets.RDBMS_USERNAME }} \
               -e RDBMS_PASSWORD=${{ secrets.RDBMS_PASSWORD }} \
