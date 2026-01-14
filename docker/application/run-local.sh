@@ -2,6 +2,8 @@
 
 #######################################################
 # 로컬에서 Spring Boot 를 Docker 로 기동하기 위한 스크립트 #
+# 사용하기 위해서는, .env.local 파일이 필요합니다. #
+# 필요하다면 ksu9801@gmail.com 으로 문의 하시기 바랍니다. #
 #######################################################
 
 set -e
@@ -12,14 +14,14 @@ CONTAINER_NAME=baekgwa-server
 NETWORK=baekgwa-network
 ENV_FILE=.env.local
 
-echo ">>> Docker image build"
-docker build -t ${IMAGE_NAME}:${TAG} ../..
+echo ">>> Stop & remove existing container (if exists)"
+docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
 
 echo ">>> Remove existing image (if exists)"
 docker rmi ${IMAGE_NAME}:${TAG} 2>/dev/null || true
 
-echo ">>> Stop & remove existing container (if exists)"
-docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
+echo ">>> Docker image build"
+docker build -t ${IMAGE_NAME}:${TAG} ../..
 
 echo ">>> Run container"
 docker run -d \
