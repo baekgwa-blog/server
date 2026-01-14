@@ -85,6 +85,6 @@ jobs:
               -e ELASTIC_APM_SECRET_TOKEN=${{ secrets.ELASTIC_APM_SECRET_TOKEN }} \
               -e ELASTIC_APM_APPLICATION_PACKAGES=baekgwa.blogserver \
               -e ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES=true \
-              -e ELASTIC_APM_SPAN_STACK_TRACE_MIN_DURATION=5ms \
+              -e ELASTIC_APM_SPAN_STACK_TRACE_MIN_DURATION=${{ secrets.ELASTIC_APM_SPAN_STACK_TRACE_MIN_DURATION }} \
               -p 8080:8080 \
               ${{ secrets.DOCKERHUB_USERNAME }}/baekgwa-server:latest
