@@ -10,6 +10,7 @@ on:
       - 'settings.gradle'
       - 'gradle/**'
       - 'Dockerfile'
+      - '.github/workflows/**'
 
 jobs:
   build-and-deploy:
