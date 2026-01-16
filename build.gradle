@@ -91,6 +91,10 @@ dependencies {
     implementation 'dev.langchain4j:langchain4j-open-ai:1.8.0'
     implementation 'dev.langchain4j:langchain4j-elasticsearch:1.8.0-beta15'
 
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.jolokia:jolokia-support-spring:2.4.3'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
