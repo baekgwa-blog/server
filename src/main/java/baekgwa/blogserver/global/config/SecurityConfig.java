@@ -99,6 +99,9 @@ public class SecurityConfig {
 				// Ai
 				.requestMatchers(POST, "/ai/stream/**").permitAll()
 
+				// Metrics
+				.requestMatchers(GET, "/actuator/**").permitAll()
+
 				.anyRequest().authenticated());
 
 		// ❗ 인증 Filter 추가
