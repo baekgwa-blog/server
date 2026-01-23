@@ -3,6 +3,7 @@ package baekgwa.blogserver.domain.stack.service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -112,10 +113,10 @@ public class StackService {
 
 	@Transactional(readOnly = true)
 	public StackResponse.StackInfo getRelativeStackPostInfo(Long postId) {
-		StackPostEntity findStackPost = stackPostRepository.findByPostIdWithStack(postId)
-			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
+		Optional<StackPostEntity> opFindStackPost = stackPostRepository.findByPostIdWithStack(postId);
+		if(opFindStackPost.isEmpty()) return null;
 
-		StackEntity findStack = findStackPost.getStack();
+		StackEntity findStack = opFindStackPost.get().getStack();
 		List<StackPostEntity> findStackPostList = stackPostRepository.findAllByStack(findStack);
 
 		List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostList.stream()
