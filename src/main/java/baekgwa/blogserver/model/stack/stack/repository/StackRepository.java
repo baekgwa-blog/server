@@ -1,7 +1,9 @@
 package baekgwa.blogserver.model.stack.stack.repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -30,4 +32,7 @@ public interface StackRepository extends JpaRepository<StackEntity, Long> {
 		"LEFT JOIN sp.post p " +
 		"GROUP BY s.id")
 	List<StackStatsDto> findStackStats();
+
+	@EntityGraph(attributePaths = {"category"})
+	Optional<StackEntity> findWithCategoryById(Long id);
 }

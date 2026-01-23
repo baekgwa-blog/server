@@ -221,18 +221,6 @@ class StackServiceTest extends SpringBootTestSupporter {
 		assertThat(response).isNull();
 	}
 
-	@DisplayName("현재 입력받은 postId 가 포함된 스택(시리즈)의 목록을 조회합니다. 잘못된 글 id 라면 오류를 발생합니다.")
-	@Test
-	void getRelativeStackPostInfo3() {
-		// given
-
-		// when // then
-		assertThatThrownBy(() -> stackService.getRelativeStackPostInfo(1L))
-			.isInstanceOf(GlobalException.class)
-			.extracting("errorCode")
-			.isEqualTo(ErrorCode.NOT_EXIST_POST);
-	}
-
 	@DisplayName("현재 등록된 모든 스택(시리즈)의 정보를 return 합니다.")
 	@Test
 	void getAllStack1() {

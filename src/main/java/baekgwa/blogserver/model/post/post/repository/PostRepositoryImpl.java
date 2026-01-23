@@ -20,6 +20,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import baekgwa.blogserver.domain.post.dto.PostResponse;
+import baekgwa.blogserver.domain.post.dto.QPostResponse_GetPostResponse;
 import baekgwa.blogserver.domain.post.type.PostListSort;
 import baekgwa.blogserver.model.post.post.entity.QPostEntity;
 import baekgwa.blogserver.model.post.tag.entity.QPostTagEntity;
@@ -91,14 +92,26 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
 		// 5. 전체 데이터 조회. 후, dto 변환
 		List<PostResponse.GetPostResponse> findData = queryFactory
-			.selectFrom(postEntity)
+			.select(new QPostResponse_GetPostResponse(
+				postEntity.id,
+				postEntity.title,
+				postEntity.description,
+				postEntity.thumbnailImage,
+				postEntity.slug,
+				postEntity.viewCount,
+				postEntity.category.name,
+				postEntity.createdAt,
+				postEntity.modifiedAt
+			))
+			.from(postEntity)
+			.join(postEntity.category)
 			.where(postEntity.id.in(postIdList))
 			.orderBy(orderSpecifier)
-			.fetch()
-			.stream()
-			.map(post -> PostResponse.GetPostResponse.of(
-				post, tagMap.getOrDefault(post.getId(), List.of())))
-			.toList();
+			.fetch();
+
+		findData.forEach(dto ->
+			dto.updateTagList(tagMap.getOrDefault(dto.getId(), List.of()))
+		);
 
 		// 6. 전체 item 개수 조회
 		Long totalCount = queryFactory

@@ -26,9 +26,10 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
 
 	Optional<CategoryEntity> findByName(String name);
 
-	@Query("SELECT new baekgwa.blogserver.model.category.projection.CategoryPostCount(c, COUNT(p.id)) " +
-		"FROM CategoryEntity c LEFT JOIN PostEntity p ON c.id = p.category.id " +
-		"GROUP BY c.id " +
+	@Query("SELECT new baekgwa.blogserver.model.category.projection.CategoryPostCount(c.id, c.name, COUNT(p.id)) " +
+		"FROM CategoryEntity c " +
+		"LEFT JOIN PostEntity p ON c.id = p.category.id " +
+		"GROUP BY c.name " +
 		"ORDER BY c.name")
 	List<CategoryPostCount> findAllWithPostCount();
 }

@@ -3,6 +3,8 @@ package baekgwa.blogserver.domain.post.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.querydsl.core.annotations.QueryProjection;
+
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -70,8 +72,6 @@ public class PostResponse {
 	}
 
 	@Getter
-	@Builder(access = AccessLevel.PROTECTED)
-	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class GetPostResponse {
 		private final Long id;
 		private final String title;
@@ -79,25 +79,29 @@ public class PostResponse {
 		private final String thumbnailImage;
 		private final String slug;
 		private final Integer viewCount;
-		private final List<String> tagList;
+		private List<String> tagList; // final 제거 (나중에 주입)
 		private final String category;
 		private final LocalDateTime createdAt;
 		private final LocalDateTime modifiedAt;
 
-		public static GetPostResponse of(PostEntity post, List<String> tagList) {
-			return GetPostResponse
-				.builder()
-				.id(post.getId())
-				.title(post.getTitle())
-				.description(post.getDescription())
-				.thumbnailImage(post.getThumbnailImage())
-				.slug(post.getSlug())
-				.viewCount(post.getViewCount())
-				.tagList(tagList)
-				.category(post.getCategory().getName())
-				.createdAt(post.getCreatedAt())
-				.modifiedAt(post.getModifiedAt())
-				.build();
+		@QueryProjection // Q클래스 생성을 위해 추가
+		public GetPostResponse(Long id, String title, String description, String thumbnailImage,
+			String slug, Integer viewCount, String category,
+			LocalDateTime createdAt, LocalDateTime modifiedAt) {
+			this.id = id;
+			this.title = title;
+			this.description = description;
+			this.thumbnailImage = thumbnailImage;
+			this.slug = slug;
+			this.viewCount = viewCount;
+			this.category = category;
+			this.createdAt = createdAt;
+			this.modifiedAt = modifiedAt;
+		}
+
+		// 태그 리스트를 나중에 넣어주기 위한 메서드
+		public void updateTagList(List<String> tagList) {
+			this.tagList = tagList;
 		}
 	}
 }

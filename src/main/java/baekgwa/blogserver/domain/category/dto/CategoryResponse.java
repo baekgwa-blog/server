@@ -31,13 +31,13 @@ public class CategoryResponse {
 		private final Long id;
 		private final Long count;
 
-		public static List<CategoryList> from(List<CategoryPostCount> categoryEntityList) {
-			return categoryEntityList
+		public static List<CategoryList> from(List<CategoryPostCount> projectionList) {
+			return projectionList
 				.stream()
 				.map(data -> CategoryList
 					.builder()
-					.name(data.category().getName())
-					.id(data.category().getId())
+					.id(data.id())
+					.name(data.name())
 					.count(data.postCount())
 					.build())
 				.toList();
