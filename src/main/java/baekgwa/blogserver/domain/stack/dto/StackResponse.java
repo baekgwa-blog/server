@@ -174,8 +174,8 @@ public class StackResponse {
 				.slug(stackPost.getPost().getSlug())
 				.sequence(stackPost.getSequence())
 				.viewCount(stackPost.getPost().getViewCount())
-				.createdAt(stackPost.getCreatedAt())
-				.modifiedAt(stackPost.getModifiedAt())
+				.createdAt(stackPost.getPost().getCreatedAt())
+				.modifiedAt(stackPost.getPost().getModifiedAt())
 				.thumbnailImage(stackPost.getPost().getThumbnailImage())
 				.build();
 		}
