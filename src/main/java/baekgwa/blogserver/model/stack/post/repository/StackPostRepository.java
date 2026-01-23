@@ -23,17 +23,14 @@ import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
  * 2025-10-22     Baekgwa               Initial creation
  */
 public interface StackPostRepository extends JpaRepository<StackPostEntity, Long> {
-	@Query("SELECT sp FROM StackPostEntity sp WHERE sp.post.id = :postId")
-	Optional<StackPostEntity> findByPostId(@Param(value = "postId") Long postId);
+	@Query("SELECT sp FROM StackPostEntity sp JOIN FETCH sp.stack WHERE sp.post.id = :postId")
+	Optional<StackPostEntity> findByPostIdWithStack(@Param("postId") Long postId);
 
 	@EntityGraph(attributePaths = {"post"})
 	List<StackPostEntity> findAllByStack(StackEntity findStack);
 
 	@Query("SELECT COUNT(sp) > 0 FROM StackPostEntity sp WHERE sp.post.id IN :postIdList")
 	boolean existsByPostIdIn(@Param("postIdList") List<Long> postIdList);
-
-	@Query("SELECT sp FROM StackPostEntity sp JOIN FETCH sp.stack s JOIN FETCH sp.post p")
-	List<StackPostEntity> findAllWithStackAndPost();
 
 	void deleteAllByStack(StackEntity stack);
 }

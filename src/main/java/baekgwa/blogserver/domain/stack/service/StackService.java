@@ -3,7 +3,6 @@ package baekgwa.blogserver.domain.stack.service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -113,26 +112,13 @@ public class StackService {
 
 	@Transactional(readOnly = true)
 	public StackResponse.StackInfo getRelativeStackPostInfo(Long postId) {
-		// 1. Post id 유효성 검사
-		if (!postRepository.existsById(postId)) {
-			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
-		}
+		StackPostEntity findStackPost = stackPostRepository.findByPostIdWithStack(postId)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
 
-		// 1. 연결된 Stack 조회
-		Optional<StackPostEntity> opFindStackPost = stackPostRepository.findByPostId(postId);
-
-		// 2. 해당 글이 스택에 등록되어있지 않으면 빈값 return
-		if (opFindStackPost.isEmpty()) {
-			return null;
-		}
-
-		// 3. 연관된 스택 조회 후, 스택의 모든 포스트 조회
-		StackEntity findStack = opFindStackPost.get().getStack();
+		StackEntity findStack = findStackPost.getStack();
 		List<StackPostEntity> findStackPostList = stackPostRepository.findAllByStack(findStack);
 
-		// 4. dto 변환 및 return
-		List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostList
-			.stream()
+		List<StackResponse.StackPostInfo> stackPostInfoList = findStackPostList.stream()
 			.map(StackResponse.StackPostInfo::of)
 			.sorted(Comparator.comparing(StackResponse.StackPostInfo::getSequence))
 			.toList();
