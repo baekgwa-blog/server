@@ -336,7 +336,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
 
 		// when
-		postService.deletePost(savePost.getId());
+		postService.deletePost(savePost.getSlug());
 
 		// then
 		assertThat(postRepository.findById(savePost.getId())).isEmpty();
@@ -348,7 +348,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		// given
 
 		// when // then
-		assertThatThrownBy(() -> postService.deletePost(1L))
+		assertThatThrownBy(() -> postService.deletePost("NOT-EXIST-SLUG"))
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_POST);

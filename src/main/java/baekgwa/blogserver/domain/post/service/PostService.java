@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -96,19 +97,23 @@ public class PostService {
 		return PostResponse.CreatePostResponse.from(generatedSlug);
 	}
 
+	@Cacheable(
+		cacheNames = CacheType.CacheNames.POST_DETAIL,
+		key = "@cacheKeyFactory.getPostDetailKey(#slug)",
+		unless = "#result == null"
+	)
 	@Transactional(readOnly = true)
 	public PostResponse.GetPostDetailResponse getPostDetail(String slug, String remoteAddr) {
-		// 1. 포스팅 글 조회
-		PostEntity postEntity = postRepository.findBySlug(slug).orElseThrow(
+		log.debug("[Cache Miss] Get Post Detail, slug:{}", slug);
+
+		PostEntity postEntity = postRepository.findWithCategoryBySlug(slug).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
 
-		// 2. 태그 이름 목록 조회
 		List<String> findTagNameList = postTagRepository.findAllByPost(postEntity)
 			.stream()
 			.map(tag -> tag.getTag().getName())
 			.toList();
 
-		// 3. viewCount 증가
 		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId(), remoteAddr));
 
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
@@ -147,16 +152,21 @@ public class PostService {
 		return PageResponse.of(findData);
 	}
 
-	@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true)
-	@Transactional
-	public void deletePost(Long postId) {
-		if (!postRepository.existsById(postId)) {
-			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
+	@Caching(
+		evict = {
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true),
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_DETAIL, key = "@cacheKeyFactory.getPostDetailKey(#slug)")
 		}
-		postRepository.deleteById(postId);
+	)
+	@Transactional
+	public void deletePost(String slug) {
+		PostEntity findPost = postRepository.findBySlug(slug)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
+
+		postRepository.deleteBySlug(slug);
 
 		// delete post embedding event 발행
-		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(postId));
+		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(findPost.getId()));
 	}
 
 	private String extractThumbnailByContent(@NonNull String content) {

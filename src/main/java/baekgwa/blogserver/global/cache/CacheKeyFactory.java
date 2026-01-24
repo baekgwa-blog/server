@@ -36,4 +36,11 @@ public final class CacheKeyFactory {
 			Objects.requireNonNullElse(sort, PostListSort.LATEST)
 		);
 	}
+
+	/**
+	 * 게시글 상세 조회 시, 캐싱을 위한 키
+	 */
+	public String getPostDetailKey(String slug) {
+		return String.format("slug:%s", slug);
+	}
 }
