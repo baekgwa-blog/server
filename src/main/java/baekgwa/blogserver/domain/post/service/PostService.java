@@ -5,6 +5,7 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import baekgwa.blogserver.domain.post.dto.PostRequest;
 import baekgwa.blogserver.domain.post.dto.PostResponse;
 import baekgwa.blogserver.domain.post.type.PostListSort;
+import baekgwa.blogserver.global.cache.CacheType;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
@@ -121,24 +123,32 @@ public class PostService {
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
 	}
 
+	@Cacheable(
+		cacheNames = CacheType.CacheNames.POST_LIST,
+		key = "@cacheKeyFactory.getPostListKey(#keyword, #category, #page, #size, #sort)",
+		unless = "#result == null"
+	)
 	@Transactional(readOnly = true)
 	public PageResponse<PostResponse.GetPostResponse> getPostList(
-		@Nullable String keyword, int page, int size, @Nullable String category, PostListSort sort
+		@Nullable String keyword,
+		int page,
+		int size,
+		@Nullable String category,
+		PostListSort sort
 	) {
-		// 1. 페이지네이션 파라미터 유효성 검증
+		log.debug("[Cache Miss] Get Post List, keyword:{}, page:{}, size:{}, category:{}, sort:{}",
+			keyword, page, size, category, sort
+		);
+
 		if (page < 0 || size < 1) {
 			throw new GlobalException(ErrorCode.INVALID_PAGINATION_PARAMETER);
 		}
 
-		// 1-1. pageRequest 생성
 		Pageable pageable = PageRequest.of(page, size);
-
-		// 2. category 유효성 검증
 		if (StringUtils.hasText(category) && !categoryRepository.existsByName(category)) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
 		}
 
-		// 3. Entity 조회
 		Page<PostResponse.GetPostResponse> findData =
 			postRepository.searchPostList(keyword, category, pageable, sort);
 
