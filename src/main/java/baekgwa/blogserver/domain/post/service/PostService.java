@@ -5,6 +5,7 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -61,47 +62,37 @@ public class PostService {
 
 	private final ApplicationEventPublisher eventPublisher;
 
+	@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true)
 	@Transactional
 	public PostResponse.CreatePostResponse create(PostRequest.CreatePost request) {
-		// 1. 제목 중복 검증 -> 슬러그로 활용됨
 		if (postRepository.existsByTitle(request.getTitle())) {
 			throw new GlobalException(ErrorCode.DUPLICATION_POST_TITLE);
 		}
 
-		// 2. category 유효성 검증 및 Entity 조회
 		CategoryEntity findCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_CATEGORY));
 
-		// 3. tagList 유효성 검증
 		List<TagEntity> findTagEntityList = tagRepository.findAllById(request.getTagIdList());
 		if (findTagEntityList.size() != request.getTagIdList().size()) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_TAG_LIST);
 		}
 
-		// 4. 썸네일 추출
 		if (!StringUtils.hasText(request.getThumbnailImage())) {
-			// 4-1. 썸네일 이미지 추출
 			String thumbnailImage = extractThumbnailByContent(request.getContent());
-			// 4-2. 새로운 request 불변 객체 생성
 			request = request.withThumbnailImage(thumbnailImage);
 		}
 
-		// 5. 슬러그 생성 (제목으로 슬러그 생성)
 		String generatedSlug = SlugUtil.generateSlug(request.getTitle());
 
-		// 6. 포스트(카테고리 포함) 생성 / 저장
 		PostEntity newPost = PostEntity.of(request.getTitle(), request.getContent(), request.getDescription(),
 			request.getThumbnailImage(), generatedSlug, findCategory);
 		postRepository.save(newPost);
 
-		// 7. 포스팅 태그 생성 / 저장
 		List<PostTagEntity> newPostTag = findTagEntityList.stream().map(tag -> PostTagEntity.of(newPost, tag)).toList();
 		postTagRepository.saveAll(newPostTag);
 
-		// 8. post embedding event 발행
 		eventPublisher.publishEvent(new EmbeddingCreatePostEvent(newPost, findTagEntityList));
 
-		// 9. 응답 생성. 리다이렉션용 slug 주소
 		return PostResponse.CreatePostResponse.from(generatedSlug);
 	}
 
@@ -125,7 +116,8 @@ public class PostService {
 
 	@Cacheable(
 		cacheNames = CacheType.CacheNames.POST_LIST,
-		key = "@cacheKeyFactory.getPostListKey(#keyword, #category, #page, #size, #sort)",
+		key = "@cacheKeyFactory.getPostListKey(#category, #page, #size, #sort)",
+		condition = "#keyword == null || #keyword.isEmpty()",
 		unless = "#result == null"
 	)
 	@Transactional(readOnly = true)
@@ -155,6 +147,7 @@ public class PostService {
 		return PageResponse.of(findData);
 	}
 
+	@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true)
 	@Transactional
 	public void deletePost(Long postId) {
 		if (!postRepository.existsById(postId)) {
