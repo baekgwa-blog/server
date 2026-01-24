@@ -78,10 +78,9 @@ public class ElasticsearchConfig {
 				log.debug("Elasticsearch index [{}] already exists.", indexName);
 				return;
 			}
-		} catch (ResponseException e) {
-			if (e.getResponse().getStatusLine().getStatusCode() != 404) {
-				throw e;
-			}
+		} catch (Exception e) {
+			log.error("Elasticsearch connection failed. Skipping index creation.", e);
+			return;
 		}
 
 		log.info("Creating Elasticsearch index [{}] with custom settings...", indexName);
