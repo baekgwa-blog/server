@@ -19,7 +19,8 @@ import lombok.experimental.UtilityClass;
 @AllArgsConstructor
 public enum CacheType {
 	POST_LIST(CacheNames.POST_LIST, 60 * 24), // 1일, 1440분
-	POST_DETAIL(CacheNames.POST_DETAIL, 60 * 24);
+	POST_DETAIL(CacheNames.POST_DETAIL, 60 * 24),
+	CATEGORY_LIST(CacheNames.CATEGORY_LIST, 60 * 24),;
 
 	private final String cacheName;
 	private final int ttlMinutes;
@@ -28,5 +29,6 @@ public enum CacheType {
 	public static class CacheNames {
 		public static final String POST_LIST = "posts:list";
 		public static final String POST_DETAIL = "posts:detail";
+		public static final String CATEGORY_LIST = "categories:list";
 	}
 }

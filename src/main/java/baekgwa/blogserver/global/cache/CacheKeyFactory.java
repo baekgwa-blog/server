@@ -43,4 +43,11 @@ public final class CacheKeyFactory {
 	public String getPostDetailKey(String slug) {
 		return String.format("slug:%s", slug);
 	}
+
+	/**
+	 * 전체 카테고리 조회용 캐시 키
+	 */
+	public String getCategoryListKey() {
+		return ALL;
+	}
 }

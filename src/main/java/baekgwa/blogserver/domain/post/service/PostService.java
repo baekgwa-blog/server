@@ -63,7 +63,12 @@ public class PostService {
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true)
+	@Caching(
+		evict = {
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true),
+			@CacheEvict(cacheNames = CacheType.CacheNames.CATEGORY_LIST, allEntries = true)
+		}
+	)
 	@Transactional
 	public PostResponse.CreatePostResponse create(PostRequest.CreatePost request) {
 		if (postRepository.existsByTitle(request.getTitle())) {
@@ -155,7 +160,8 @@ public class PostService {
 	@Caching(
 		evict = {
 			@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true),
-			@CacheEvict(cacheNames = CacheType.CacheNames.POST_DETAIL, key = "@cacheKeyFactory.getPostDetailKey(#slug)")
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_DETAIL, key = "@cacheKeyFactory.getPostDetailKey(#slug)"),
+			@CacheEvict(cacheNames = CacheType.CacheNames.CATEGORY_LIST, allEntries = true)
 		}
 	)
 	@Transactional

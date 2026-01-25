@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * PackageName : baekgwa.blogserver.domain.post.dto
@@ -72,6 +73,9 @@ public class PostResponse {
 	}
 
 	@Getter
+	@Jacksonized
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class GetPostResponse {
 		private final Long id;
 		private final String title;

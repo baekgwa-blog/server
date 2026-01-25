@@ -18,8 +18,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,17 +44,27 @@ public class RedisCacheConfig {
 
 	@Bean
 	public CacheManager cacheManager(
-		RedisConnectionFactory connectionFactory,
-		ObjectMapper rootObjectMapper
+		RedisConnectionFactory connectionFactory
 	) {
-		ObjectMapper redisObjectMapper = rootObjectMapper.copy();
+		ObjectMapper redisObjectMapper = new ObjectMapper();
+
+		redisObjectMapper.registerModule(new JavaTimeModule());
+		redisObjectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 		PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-			.allowIfBaseType(Object.class)
+			.allowIfSubType("baekgwa.blogserver")
+			.allowIfSubType("java.util")
+			.allowIfSubType("java.time")
 			.build();
-		redisObjectMapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
 
-		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+		redisObjectMapper.activateDefaultTyping(
+			ptv,
+			ObjectMapper.DefaultTyping.NON_FINAL,
+			JsonTypeInfo.As.PROPERTY
+		);
+
+		GenericJackson2JsonRedisSerializer serializer =
+			new GenericJackson2JsonRedisSerializer(redisObjectMapper);
 
 		RedisCacheConfiguration defaultConf = RedisCacheConfiguration.defaultCacheConfig()
 			.disableCachingNullValues()
