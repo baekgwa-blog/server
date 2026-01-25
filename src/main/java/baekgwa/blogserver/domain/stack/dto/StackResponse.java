@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * PackageName : baekgwa.blogserver.domain.stack.dto
@@ -84,6 +85,7 @@ public class StackResponse {
 	}
 
 	@Getter
+	@Jacksonized
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackInfo {
@@ -152,6 +154,7 @@ public class StackResponse {
 	}
 
 	@Getter
+	@Jacksonized
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class StackPostInfo {

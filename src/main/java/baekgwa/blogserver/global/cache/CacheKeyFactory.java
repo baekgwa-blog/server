@@ -50,4 +50,11 @@ public final class CacheKeyFactory {
 	public String getCategoryListKey() {
 		return ALL;
 	}
+
+	/**
+	 * Stack Post 연관글 조회용 캐시 키
+	 */
+	public String getRelativeStackPostListKey(Long stackId) {
+		return String.format("stack:%s", stackId);
+	}
 }

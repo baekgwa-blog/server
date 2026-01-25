@@ -43,7 +43,8 @@ class PostControllerTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(5);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList, saveCategory.getId());
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList,
+			saveCategory.getId());
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/post")
@@ -67,7 +68,8 @@ class PostControllerTest extends SpringBootTestSupporter {
 		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
 		List<TagEntity> saveTagList = tagDataFactory.newTagList(5);
 		List<Long> saveTagIdList = saveTagList.stream().map(TagEntity::getId).toList();
-		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList, saveCategory.getId());
+		PostRequest.CreatePost request = PostRequest.CreatePost.of("제목", "내용", "설명", "썸네일url", saveTagIdList,
+			saveCategory.getId());
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/post/detail")
@@ -175,7 +177,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
 
 		// when
-		ResultActions perform = mockMvc.perform(delete("/post/{postId}", savePost.getId()));
+		ResultActions perform = mockMvc.perform(delete("/post/{slug}", savePost.getSlug()));
 
 		// then
 		perform.andDo(print())

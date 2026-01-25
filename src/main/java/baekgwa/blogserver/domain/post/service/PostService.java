@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import baekgwa.blogserver.domain.post.dto.PostRequest;
 import baekgwa.blogserver.domain.post.dto.PostResponse;
 import baekgwa.blogserver.domain.post.type.PostListSort;
+import baekgwa.blogserver.domain.stack.service.StackCacheService;
 import baekgwa.blogserver.global.cache.CacheType;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
@@ -34,6 +35,7 @@ import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.entity.PostTagEntity;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
+import baekgwa.blogserver.model.stack.post.repository.StackPostRepository;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
 import lombok.NonNull;
@@ -56,8 +58,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PostService {
 
+	private final StackCacheService stackCacheService;
+
 	private final PostRepository postRepository;
 	private final PostTagRepository postTagRepository;
+	private final StackPostRepository stackPostRepository;
 	private final TagRepository tagRepository;
 	private final CategoryRepository categoryRepository;
 
@@ -168,6 +173,11 @@ public class PostService {
 	public void deletePost(String slug) {
 		PostEntity findPost = postRepository.findBySlug(slug)
 			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
+
+		Long stackId = stackPostRepository.findStackIdByPostId(findPost.getId()).orElse(null);
+		if (stackId != null) {
+			stackCacheService.deleteStackPostLink(stackId, findPost.getId());
+		}
 
 		postRepository.deleteBySlug(slug);
 

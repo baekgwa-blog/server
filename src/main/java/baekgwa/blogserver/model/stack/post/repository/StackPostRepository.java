@@ -33,4 +33,9 @@ public interface StackPostRepository extends JpaRepository<StackPostEntity, Long
 	boolean existsByPostIdIn(@Param("postIdList") List<Long> postIdList);
 
 	void deleteAllByStack(StackEntity stack);
+
+	void deleteByStackIdAndPostId(Long stackId, Long postId);
+
+	@Query("SELECT sp.stack.id FROM StackPostEntity sp WHERE sp.post.id = :postId")
+	Optional<Long> findStackIdByPostId(@Param("postId") Long postId);
 }
