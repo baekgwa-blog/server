@@ -39,6 +39,7 @@ public class PostResponse {
 	}
 
 	@Getter
+	@Jacksonized
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class GetPostDetailResponse {
