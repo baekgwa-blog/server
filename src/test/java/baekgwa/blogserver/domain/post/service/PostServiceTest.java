@@ -19,6 +19,7 @@ import baekgwa.blogserver.integration.SpringBootTestSupporter;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.tag.entity.PostTagEntity;
+import baekgwa.blogserver.model.stack.stack.entity.StackEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 
 /**
@@ -336,7 +337,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
 
 		// when
-		postService.deletePost(savePost.getId());
+		postService.deletePost(savePost.getSlug());
 
 		// then
 		assertThat(postRepository.findById(savePost.getId())).isEmpty();
@@ -348,9 +349,27 @@ class PostServiceTest extends SpringBootTestSupporter {
 		// given
 
 		// when // then
-		assertThatThrownBy(() -> postService.deletePost(1L))
+		assertThatThrownBy(() -> postService.deletePost("NOT-EXIST-SLUG"))
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_POST);
+	}
+
+	@DisplayName("특정 스택에 포함된 글이라면, 스택 목록에서도 제거 합니다.")
+	@Test
+	void deletePost3() {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
+		StackEntity saveStack = stackDataFactory.newStack(1L, saveCategory).getFirst();
+		stackDataFactory.newStackPost(saveStack, List.of(savePost));
+
+		// when
+		postService.deletePost(savePost.getSlug());
+
+		// then
+		assertThat(postRepository.findById(savePost.getId())).isEmpty();
+		assertThat(stackPostRepository.findAll()).isEmpty();
 	}
 }

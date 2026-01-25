@@ -1,6 +1,7 @@
 package baekgwa.blogserver.domain.category.dto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import baekgwa.blogserver.model.category.projection.CategoryPostCount;
 import lombok.AccessLevel;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * PackageName : baekgwa.blogserver.domain.category.dto
@@ -24,6 +26,7 @@ import lombok.NoArgsConstructor;
 public class CategoryResponse {
 
 	@Getter
+	@Jacksonized
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class CategoryList {
@@ -40,7 +43,7 @@ public class CategoryResponse {
 					.name(data.name())
 					.count(data.postCount())
 					.build())
-				.toList();
+				.collect(Collectors.toList());
 		}
 	}
 }

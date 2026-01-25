@@ -5,6 +5,9 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +20,8 @@ import org.springframework.util.StringUtils;
 import baekgwa.blogserver.domain.post.dto.PostRequest;
 import baekgwa.blogserver.domain.post.dto.PostResponse;
 import baekgwa.blogserver.domain.post.type.PostListSort;
+import baekgwa.blogserver.domain.stack.service.StackCacheService;
+import baekgwa.blogserver.global.cache.CacheType;
 import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
@@ -30,6 +35,7 @@ import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.entity.PostTagEntity;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
+import baekgwa.blogserver.model.stack.post.repository.StackPostRepository;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
 import baekgwa.blogserver.model.tag.repository.TagRepository;
 import lombok.NonNull;
@@ -52,108 +58,131 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PostService {
 
+	private final StackCacheService stackCacheService;
+
 	private final PostRepository postRepository;
 	private final PostTagRepository postTagRepository;
+	private final StackPostRepository stackPostRepository;
 	private final TagRepository tagRepository;
 	private final CategoryRepository categoryRepository;
 
 	private final ApplicationEventPublisher eventPublisher;
 
+	@Caching(
+		evict = {
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true),
+			@CacheEvict(cacheNames = CacheType.CacheNames.CATEGORY_LIST, allEntries = true)
+		}
+	)
 	@Transactional
 	public PostResponse.CreatePostResponse create(PostRequest.CreatePost request) {
-		// 1. 제목 중복 검증 -> 슬러그로 활용됨
 		if (postRepository.existsByTitle(request.getTitle())) {
 			throw new GlobalException(ErrorCode.DUPLICATION_POST_TITLE);
 		}
 
-		// 2. category 유효성 검증 및 Entity 조회
 		CategoryEntity findCategory = categoryRepository.findById(request.getCategoryId()).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_CATEGORY));
 
-		// 3. tagList 유효성 검증
 		List<TagEntity> findTagEntityList = tagRepository.findAllById(request.getTagIdList());
 		if (findTagEntityList.size() != request.getTagIdList().size()) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_TAG_LIST);
 		}
 
-		// 4. 썸네일 추출
 		if (!StringUtils.hasText(request.getThumbnailImage())) {
-			// 4-1. 썸네일 이미지 추출
 			String thumbnailImage = extractThumbnailByContent(request.getContent());
-			// 4-2. 새로운 request 불변 객체 생성
 			request = request.withThumbnailImage(thumbnailImage);
 		}
 
-		// 5. 슬러그 생성 (제목으로 슬러그 생성)
 		String generatedSlug = SlugUtil.generateSlug(request.getTitle());
 
-		// 6. 포스트(카테고리 포함) 생성 / 저장
 		PostEntity newPost = PostEntity.of(request.getTitle(), request.getContent(), request.getDescription(),
 			request.getThumbnailImage(), generatedSlug, findCategory);
 		postRepository.save(newPost);
 
-		// 7. 포스팅 태그 생성 / 저장
 		List<PostTagEntity> newPostTag = findTagEntityList.stream().map(tag -> PostTagEntity.of(newPost, tag)).toList();
 		postTagRepository.saveAll(newPostTag);
 
-		// 8. post embedding event 발행
 		eventPublisher.publishEvent(new EmbeddingCreatePostEvent(newPost, findTagEntityList));
 
-		// 9. 응답 생성. 리다이렉션용 slug 주소
 		return PostResponse.CreatePostResponse.from(generatedSlug);
 	}
 
+	@Cacheable(
+		cacheNames = CacheType.CacheNames.POST_DETAIL,
+		key = "@cacheKeyFactory.getPostDetailKey(#slug)",
+		unless = "#result == null"
+	)
 	@Transactional(readOnly = true)
 	public PostResponse.GetPostDetailResponse getPostDetail(String slug, String remoteAddr) {
-		// 1. 포스팅 글 조회
-		PostEntity postEntity = postRepository.findBySlug(slug).orElseThrow(
+		log.debug("[Cache Miss] Get Post Detail, slug:{}", slug);
+
+		PostEntity postEntity = postRepository.findWithCategoryBySlug(slug).orElseThrow(
 			() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
 
-		// 2. 태그 이름 목록 조회
 		List<String> findTagNameList = postTagRepository.findAllByPost(postEntity)
 			.stream()
 			.map(tag -> tag.getTag().getName())
 			.toList();
 
-		// 3. viewCount 증가
 		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId(), remoteAddr));
 
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
 	}
 
+	@Cacheable(
+		cacheNames = CacheType.CacheNames.POST_LIST,
+		key = "@cacheKeyFactory.getPostListKey(#category, #page, #size, #sort)",
+		condition = "#keyword == null || #keyword.isEmpty()",
+		unless = "#result == null"
+	)
 	@Transactional(readOnly = true)
 	public PageResponse<PostResponse.GetPostResponse> getPostList(
-		@Nullable String keyword, int page, int size, @Nullable String category, PostListSort sort
+		@Nullable String keyword,
+		int page,
+		int size,
+		@Nullable String category,
+		PostListSort sort
 	) {
-		// 1. 페이지네이션 파라미터 유효성 검증
+		log.debug("[Cache Miss] Get Post List, keyword:{}, page:{}, size:{}, category:{}, sort:{}",
+			keyword, page, size, category, sort
+		);
+
 		if (page < 0 || size < 1) {
 			throw new GlobalException(ErrorCode.INVALID_PAGINATION_PARAMETER);
 		}
 
-		// 1-1. pageRequest 생성
 		Pageable pageable = PageRequest.of(page, size);
-
-		// 2. category 유효성 검증
 		if (StringUtils.hasText(category) && !categoryRepository.existsByName(category)) {
 			throw new GlobalException(ErrorCode.NOT_EXIST_CATEGORY);
 		}
 
-		// 3. Entity 조회
 		Page<PostResponse.GetPostResponse> findData =
 			postRepository.searchPostList(keyword, category, pageable, sort);
 
 		return PageResponse.of(findData);
 	}
 
-	@Transactional
-	public void deletePost(Long postId) {
-		if (!postRepository.existsById(postId)) {
-			throw new GlobalException(ErrorCode.NOT_EXIST_POST);
+	@Caching(
+		evict = {
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_LIST, allEntries = true),
+			@CacheEvict(cacheNames = CacheType.CacheNames.POST_DETAIL, key = "@cacheKeyFactory.getPostDetailKey(#slug)"),
+			@CacheEvict(cacheNames = CacheType.CacheNames.CATEGORY_LIST, allEntries = true)
 		}
-		postRepository.deleteById(postId);
+	)
+	@Transactional
+	public void deletePost(String slug) {
+		PostEntity findPost = postRepository.findBySlug(slug)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
+
+		Long stackId = stackPostRepository.findStackIdByPostId(findPost.getId()).orElse(null);
+		if (stackId != null) {
+			stackCacheService.deleteStackPostLink(stackId, findPost.getId());
+		}
+
+		postRepository.deleteBySlug(slug);
 
 		// delete post embedding event 발행
-		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(postId));
+		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(findPost.getId()));
 	}
 
 	private String extractThumbnailByContent(@NonNull String content) {

@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * PackageName : baekgwa.blogserver.domain.post.dto
@@ -38,6 +39,7 @@ public class PostResponse {
 	}
 
 	@Getter
+	@Jacksonized
 	@Builder(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class GetPostDetailResponse {
@@ -72,6 +74,9 @@ public class PostResponse {
 	}
 
 	@Getter
+	@Jacksonized
+	@Builder(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class GetPostResponse {
 		private final Long id;
 		private final String title;
@@ -79,12 +84,12 @@ public class PostResponse {
 		private final String thumbnailImage;
 		private final String slug;
 		private final Integer viewCount;
-		private List<String> tagList; // final 제거 (나중에 주입)
+		private List<String> tagList;
 		private final String category;
 		private final LocalDateTime createdAt;
 		private final LocalDateTime modifiedAt;
 
-		@QueryProjection // Q클래스 생성을 위해 추가
+		@QueryProjection
 		public GetPostResponse(Long id, String title, String description, String thumbnailImage,
 			String slug, Integer viewCount, String category,
 			LocalDateTime createdAt, LocalDateTime modifiedAt) {

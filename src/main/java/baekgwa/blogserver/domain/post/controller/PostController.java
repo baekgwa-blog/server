@@ -75,12 +75,12 @@ public class PostController {
 		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
 	}
 
-	@DeleteMapping("/{postId}")
+	@DeleteMapping("/{slug}")
 	@Operation(summary = "포스트 글 삭제")
 	public BaseResponse<Void> deletePost(
-		@PathVariable(value = "postId", required = true) final Long postId
+		@PathVariable(value = "slug", required = true) final String slug
 	) {
-		postService.deletePost(postId);
+		postService.deletePost(slug);
 		return BaseResponse.success(SuccessCode.DELETE_POST_SUCCESS);
 	}
 }

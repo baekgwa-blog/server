@@ -25,5 +25,9 @@ public interface PostRepository extends JpaRepository<PostEntity, Long>, PostRep
 	boolean existsByCategory(CategoryEntity category);
 
 	@EntityGraph(attributePaths = {"category"})
+	Optional<PostEntity> findWithCategoryBySlug(String slug);
+
 	Optional<PostEntity> findBySlug(String slug);
+
+	void deleteBySlug(String slug);
 }

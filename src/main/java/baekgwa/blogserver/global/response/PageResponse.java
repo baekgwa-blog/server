@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * PackageName : baekgwa.blogserver.global.response
@@ -21,7 +22,8 @@ import lombok.RequiredArgsConstructor;
  * 2025-05-30     Baekgwa               Initial creation
  */
 @Getter
-@Builder(access = AccessLevel.PRIVATE)
+@Jacksonized
+@Builder(access = AccessLevel.PROTECTED)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class PageResponse<T> {
 	private final List<T> content;
@@ -29,8 +31,8 @@ public class PageResponse<T> {
 	private final int pageSize;
 	private final long totalElements;
 	private final int totalPages;
-	private final boolean isLast;
-	private final boolean isFirst;
+	private final boolean last;
+	private final boolean first;
 	private final boolean hasNext;
 	private final boolean hasPrevious;
 
@@ -42,11 +44,10 @@ public class PageResponse<T> {
 			.pageSize(page.getSize())
 			.totalElements(page.getTotalElements())
 			.totalPages(page.getTotalPages())
-			.isLast(page.isLast())
-			.isFirst(page.isFirst())
+			.last(page.isLast())
+			.first(page.isFirst())
 			.hasNext(page.hasNext())
 			.hasPrevious(page.hasPrevious())
 			.build();
 	}
 }
-
