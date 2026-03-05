@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * PackageName : baekgwa.blogserver.domain.post.controller
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-19     Baekgwa               Initial creation
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/post")
@@ -57,6 +59,7 @@ public class PostController {
 		@RequestParam(value = "slug", required = true) String slug,
 		HttpServletRequest request
 	) {
+		log.warn("IP Test {}", request.getRemoteAddr());
 		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug, request.getRemoteAddr());
 		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
 	}
