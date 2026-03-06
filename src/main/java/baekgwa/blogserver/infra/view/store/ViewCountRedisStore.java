@@ -35,16 +35,19 @@ public class ViewCountRedisStore implements ViewCountStore {
 	@Override
 	public void incrementViewCount(ViewDomain domain, Long id, String remoteAddr) {
 
-		long ttlSeconds = getSecondsUntilMidnight();
-		String checkKey = "viewed:" + domain.getKey() + ":" + id + ":" + remoteAddr;
-		Boolean isFirstViewToday = st.opsForValue().setIfAbsent(checkKey, "1", ttlSeconds, TimeUnit.SECONDS);
-		if (Boolean.FALSE.equals(isFirstViewToday)) {
+		String setKey = "viewed:today:" + domain.getDeduplicationKey() + ":" + id;
+		Long added = st.opsForSet().add(setKey, remoteAddr);
+		if (added == null || added == 0) {
 			log.debug("remoteAddr : {}, postId : {} 는 오늘 이미 본 블로그 글 입니다. 조회수가 증가되지 않습니다.", remoteAddr, id);
 			return;
 		}
-		String hashKey = domain.getKey();
-		String field = id.toString();
-		st.opsForHash().increment(hashKey, field, 1L);
+
+		Long currentTtl = st.getExpire(setKey, TimeUnit.SECONDS);
+		if (currentTtl < 0) {
+			st.expire(setKey, getSecondsUntilMidnight(), TimeUnit.SECONDS);
+		}
+
+		st.opsForHash().increment(domain.getKey(), id.toString(), 1L);
 	}
 
 	/**
@@ -59,10 +62,10 @@ public class ViewCountRedisStore implements ViewCountStore {
 		String hashKey = domain.getKey();
 		Map<Object, Object> entries = st.opsForHash().entries(hashKey);
 		return entries.entrySet().stream()
-			.collect(Collectors.toMap(
-				entry -> Long.parseLong((String)entry.getKey()),
-				entry -> Long.parseLong((String)entry.getValue())
-			));
+				.collect(Collectors.toMap(
+						entry -> Long.parseLong((String)entry.getKey()),
+						entry -> Long.parseLong((String)entry.getValue())
+				));
 	}
 
 	@Override
