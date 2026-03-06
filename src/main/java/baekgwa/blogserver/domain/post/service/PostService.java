@@ -28,7 +28,8 @@ import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.util.SlugUtil;
 import baekgwa.blogserver.infra.embedding.event.EmbeddingCreatePostEvent;
 import baekgwa.blogserver.infra.embedding.event.EmbeddingDeletePostEvent;
-import baekgwa.blogserver.infra.view.event.PostViewEvent;
+import baekgwa.blogserver.infra.view.type.ViewDomain;
+import baekgwa.blogserver.infra.view.updater.ViewCountUpdater;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
@@ -66,6 +67,7 @@ public class PostService {
 	private final TagRepository tagRepository;
 	private final CategoryRepository categoryRepository;
 
+	private final ViewCountUpdater viewCountUpdater;
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Caching(
@@ -113,7 +115,7 @@ public class PostService {
 		unless = "#result == null"
 	)
 	@Transactional(readOnly = true)
-	public PostResponse.GetPostDetailResponse getPostDetail(String slug, String remoteAddr) {
+	public PostResponse.GetPostDetailResponse getPostDetail(String slug) {
 		log.debug("[Cache Miss] Get Post Detail, slug:{}", slug);
 
 		PostEntity postEntity = postRepository.findWithCategoryBySlug(slug).orElseThrow(
@@ -124,9 +126,13 @@ public class PostService {
 			.map(tag -> tag.getTag().getName())
 			.toList();
 
-		eventPublisher.publishEvent(new PostViewEvent(postEntity.getId(), remoteAddr));
-
 		return PostResponse.GetPostDetailResponse.of(postEntity, findTagNameList);
+	}
+
+	public void increaseViewCount(String slug, String remoteAddr) {
+		PostEntity post = postRepository.findBySlug(slug)
+			.orElseThrow(() -> new GlobalException(ErrorCode.NOT_EXIST_POST));
+		viewCountUpdater.updateViewCount(ViewDomain.POST, post.getId(), remoteAddr);
 	}
 
 	@Cacheable(

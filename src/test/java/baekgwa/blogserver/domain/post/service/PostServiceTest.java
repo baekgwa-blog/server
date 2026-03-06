@@ -162,7 +162,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
 
 		// when
-		PostResponse.GetPostDetailResponse response = postService.getPostDetail(savePost.getSlug(), REMOTE_ADDR);
+		PostResponse.GetPostDetailResponse response = postService.getPostDetail(savePost.getSlug());
 
 		// then
 		assertThat(response)
@@ -180,7 +180,7 @@ class PostServiceTest extends SpringBootTestSupporter {
 		// given
 
 		// when // then
-		assertThatThrownBy(() -> postService.getPostDetail("없는Slug", REMOTE_ADDR))
+		assertThatThrownBy(() -> postService.getPostDetail("없는Slug"))
 			.isInstanceOf(GlobalException.class)
 			.extracting("errorCode")
 			.isEqualTo(ErrorCode.NOT_EXIST_POST);
