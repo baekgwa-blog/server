@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-19     Baekgwa               Initial creation
  */
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/post")
@@ -59,14 +58,6 @@ public class PostController {
 		@RequestParam(value = "slug", required = true) String slug,
 		HttpServletRequest request
 	) {
-		// 1. Nginx/Next.js가 넘겨준 '진짜 원본 헤더'를 직접 까봅니다.
-		log.warn("=== 원본 헤더 확인 ===");
-		log.warn("X-Forwarded-For 헤더: {}",request.getHeader("X-Forwarded-For"));
-		log.warn("X-Real-IP 헤더: {}", request.getHeader("X-Real-IP"));
-
-		// 2. Spring Boot가 필터링을 거친 후 인식한 IP를 확인합니다.
-		log.warn("Spring Boot(Tomcat) 인식 IP: {}", request.getRemoteAddr());
-		log.warn("======================");
 		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug, request.getRemoteAddr());
 		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
 	}
