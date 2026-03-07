@@ -3,11 +3,14 @@ package baekgwa.blogserver.infra.view.store;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 
 import baekgwa.blogserver.infra.view.type.ViewDomain;
@@ -19,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * FileName    : ViewCountRedisStore
  * Author      : Baekgwa
  * Date        : 25. 11. 3.
- * Description : 
+ * Description :
  * =====================================================================================================================
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
@@ -30,24 +33,32 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ViewCountRedisStore implements ViewCountStore {
 
+	private static final DefaultRedisScript<Long> VIEW_COUNT_SCRIPT;
+
+	static {
+		VIEW_COUNT_SCRIPT = new DefaultRedisScript<>();
+		VIEW_COUNT_SCRIPT.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/view_count_increment.lua")));
+		VIEW_COUNT_SCRIPT.setResultType(Long.class);
+	}
+
 	private final StringRedisTemplate st;
 
 	@Override
 	public void incrementViewCount(ViewDomain domain, Long id, String remoteAddr) {
-
 		String setKey = "viewed:today:" + domain.getDeduplicationKey() + ":" + id;
-		Long added = st.opsForSet().add(setKey, remoteAddr);
-		if (added == null || added == 0) {
+		String hashKey = domain.getKey();
+
+		Long result = st.execute(
+			VIEW_COUNT_SCRIPT,
+			List.of(setKey, hashKey),
+			remoteAddr,
+			id.toString(),
+			String.valueOf(getSecondsUntilMidnight())
+		);
+
+		if (result == null || result == 0L) {
 			log.debug("remoteAddr : {}, postId : {} 는 오늘 이미 본 블로그 글 입니다. 조회수가 증가되지 않습니다.", remoteAddr, id);
-			return;
 		}
-
-		Long currentTtl = st.getExpire(setKey, TimeUnit.SECONDS);
-		if (currentTtl < 0) {
-			st.expire(setKey, getSecondsUntilMidnight(), TimeUnit.SECONDS);
-		}
-
-		st.opsForHash().increment(domain.getKey(), id.toString(), 1L);
 	}
 
 	/**
