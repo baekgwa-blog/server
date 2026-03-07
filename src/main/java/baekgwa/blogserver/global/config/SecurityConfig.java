@@ -122,6 +122,7 @@ public class SecurityConfig {
 		// configuration.setAllowedHeaders(List.of("Authorization")); // 필요에 따라 open 예정.
 		// configuration.setExposedHeaders(List.of("Authorization")); // 필요에 따라 open 예정.
 		configuration.setAllowedHeaders(List.of("Content-Type"));
+		configuration.setExposedHeaders(List.of("X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "Retry-After"));
 		configuration.setMaxAge(3600L);
 
 		return request -> configuration;

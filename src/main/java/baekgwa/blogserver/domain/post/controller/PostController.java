@@ -16,6 +16,7 @@ import baekgwa.blogserver.domain.post.type.PostListSort;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
+import baekgwa.blogserver.global.util.ClientIpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,7 +67,7 @@ public class PostController {
 		@PathVariable String slug,
 		HttpServletRequest request
 	) {
-		postService.increaseViewCount(slug, request.getRemoteAddr());
+		postService.increaseViewCount(slug, ClientIpUtils.extract(request));
 		return BaseResponse.success(SuccessCode.INCREASE_VIEW_COUNT_SUCCESS);
 	}
 
