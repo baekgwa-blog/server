@@ -99,6 +99,7 @@ public class SecurityConfig {
 
 						// Ai
 						.requestMatchers(POST, "/ai/stream/**").permitAll()
+						.requestMatchers(GET, "/ai/health").permitAll()
 
 						// Metrics
 						.requestMatchers(GET, "/actuator/**").permitAll()
