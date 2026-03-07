@@ -35,6 +35,12 @@ url:
   frontend: ${FRONTEND_URL}
   backend: ${API_SERVER_URL}
 
+rate-limit:
+  ai:
+    search:
+      limit: 10
+      window-seconds: 3600
+
 management:
   endpoints:
     web:

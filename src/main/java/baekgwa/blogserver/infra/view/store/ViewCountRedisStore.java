@@ -3,11 +3,14 @@ package baekgwa.blogserver.infra.view.store;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 
 import baekgwa.blogserver.infra.view.type.ViewDomain;
@@ -19,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * FileName    : ViewCountRedisStore
  * Author      : Baekgwa
  * Date        : 25. 11. 3.
- * Description : 
+ * Description :
  * =====================================================================================================================
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
@@ -30,21 +33,32 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ViewCountRedisStore implements ViewCountStore {
 
+	private static final DefaultRedisScript<Long> VIEW_COUNT_SCRIPT;
+
+	static {
+		VIEW_COUNT_SCRIPT = new DefaultRedisScript<>();
+		VIEW_COUNT_SCRIPT.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/view_count_increment.lua")));
+		VIEW_COUNT_SCRIPT.setResultType(Long.class);
+	}
+
 	private final StringRedisTemplate st;
 
 	@Override
 	public void incrementViewCount(ViewDomain domain, Long id, String remoteAddr) {
-
-		long ttlSeconds = getSecondsUntilMidnight();
-		String checkKey = "viewed:" + domain.getKey() + ":" + id + ":" + remoteAddr;
-		Boolean isFirstViewToday = st.opsForValue().setIfAbsent(checkKey, "1", ttlSeconds, TimeUnit.SECONDS);
-		if (Boolean.FALSE.equals(isFirstViewToday)) {
-			log.debug("remoteAddr : {}, postId : {} 는 오늘 이미 본 블로그 글 입니다. 조회수가 증가되지 않습니다.", remoteAddr, id);
-			return;
-		}
+		String setKey = "viewed:today:" + domain.getDeduplicationKey() + ":" + id;
 		String hashKey = domain.getKey();
-		String field = id.toString();
-		st.opsForHash().increment(hashKey, field, 1L);
+
+		Long result = st.execute(
+			VIEW_COUNT_SCRIPT,
+			List.of(setKey, hashKey),
+			remoteAddr,
+			id.toString(),
+			String.valueOf(getSecondsUntilMidnight())
+		);
+
+		if (result == null || result == 0L) {
+			log.debug("remoteAddr : {}, postId : {} 는 오늘 이미 본 블로그 글 입니다. 조회수가 증가되지 않습니다.", remoteAddr, id);
+		}
 	}
 
 	/**
@@ -59,10 +73,10 @@ public class ViewCountRedisStore implements ViewCountStore {
 		String hashKey = domain.getKey();
 		Map<Object, Object> entries = st.opsForHash().entries(hashKey);
 		return entries.entrySet().stream()
-			.collect(Collectors.toMap(
-				entry -> Long.parseLong((String)entry.getKey()),
-				entry -> Long.parseLong((String)entry.getValue())
-			));
+				.collect(Collectors.toMap(
+						entry -> Long.parseLong((String)entry.getKey()),
+						entry -> Long.parseLong((String)entry.getValue())
+				));
 	}
 
 	@Override

@@ -36,6 +36,7 @@ public enum SuccessCode {
 	//포스팅
 	CREATE_POST_SUCCESS(HttpStatus.CREATED, "포스팅 완료"),
 	DELETE_POST_SUCCESS(HttpStatus.OK, "포스트 삭제 완료"),
+	INCREASE_VIEW_COUNT_SUCCESS(HttpStatus.OK, "조회수 증가 완료"),
 
 	//파일 업로드
 	UPLOAD_IMAGE_SUCCESS(HttpStatus.CREATED, "이미지 업로드 완료"),

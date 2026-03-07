@@ -18,8 +18,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ViewDomain {
 
-	POST("게시글", "post:views");
+	POST("게시글", "post:views", "post");
 
 	private final String description;
 	private final String key;
+	private final String deduplicationKey;
 }

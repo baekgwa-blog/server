@@ -51,6 +51,9 @@ public enum ErrorCode {
 	ALREADY_REGISTER_POST_STACK_SERIES(HttpStatus.BAD_REQUEST, "6003", "이미 스택(시리즈)에 등록된 글이 존재합니다. 확인해주세요."),
 	NOTFOUND_STACK(HttpStatus.NOT_FOUND, "6004", "잘못된 스택 입니다."),
 
+	//AI : 7000 ~ 7999
+	AI_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "7000", "AI 검색 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요."),
+
 	//Common: 9000 ~ 9999
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "9001", "요청하신 URL 을 찾을 수 없습니다."),
 	NOT_SUPPORTED_METHOD(HttpStatus.METHOD_NOT_ALLOWED, "9002", "요청 메서드를 찾을 수 없습니다."),

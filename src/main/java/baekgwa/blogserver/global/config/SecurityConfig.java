@@ -57,52 +57,54 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			// ✅ 보안 관련 설정 (CSRF, CORS, 세션)
-			.csrf(AbstractHttpConfigurer::disable)
+				// ✅ 보안 관련 설정 (CSRF, CORS, 세션)
+				.csrf(AbstractHttpConfigurer::disable)
 
-			// ✅ 기본 인증 방식 비활성화 (JWT 사용)
-			.httpBasic(AbstractHttpConfigurer::disable)
-			.formLogin(AbstractHttpConfigurer::disable)
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				// ✅ 기본 인증 방식 비활성화 (JWT 사용)
+				.httpBasic(AbstractHttpConfigurer::disable)
+				.formLogin(AbstractHttpConfigurer::disable)
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-			// ✅ Cors Setting
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				// ✅ Cors Setting
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-			// ✅ End-point Setting
-			.authorizeHttpRequests(authorize -> authorize
-				// 프론트엔드에서 적용될 예외 포인트 설정
-				.requestMatchers("/error", "/favicon.ico").permitAll()
-				// Swagger 문서 접근 허용
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
-					"/swagger-ui.html").permitAll()
-				.requestMatchers(GET, "/health").permitAll()
+				// ✅ End-point Setting
+				.authorizeHttpRequests(authorize -> authorize
+						// 프론트엔드에서 적용될 예외 포인트 설정
+						.requestMatchers("/error", "/favicon.ico").permitAll()
+						// Swagger 문서 접근 허용
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
+								"/swagger-ui.html").permitAll()
+						.requestMatchers(GET, "/health").permitAll()
 
-				// Authentication
-				.requestMatchers(POST, "/auth/login").permitAll()
-				.requestMatchers(POST, "/auth/logout").permitAll()
+						// Authentication
+						.requestMatchers(POST, "/auth/login").permitAll()
+						.requestMatchers(POST, "/auth/logout").permitAll()
 
-				// Category
-				.requestMatchers(GET, "/category").permitAll()
+						// Category
+						.requestMatchers(GET, "/category").permitAll()
 
-				// Tag
-				.requestMatchers(GET, "/tag").permitAll()
+						// Tag
+						.requestMatchers(GET, "/tag").permitAll()
 
-				// Post
-				.requestMatchers(GET, "/post/detail").permitAll()
-				.requestMatchers(GET, "/post").permitAll()
+						// Post
+						.requestMatchers(GET, "/post/detail").permitAll()
+						.requestMatchers(GET, "/post").permitAll()
+						.requestMatchers(POST, "/post/{slug}/view").permitAll()
 
-				// Stack
-				.requestMatchers(GET, "/stack/post/{postId}").permitAll()
-				.requestMatchers(GET, "/stack").permitAll()
-				.requestMatchers(GET, "/stack/{postId}").permitAll()
+						// Stack
+						.requestMatchers(GET, "/stack/post/{postId}").permitAll()
+						.requestMatchers(GET, "/stack").permitAll()
+						.requestMatchers(GET, "/stack/{postId}").permitAll()
 
-				// Ai
-				.requestMatchers(POST, "/ai/stream/**").permitAll()
+						// Ai
+						.requestMatchers(POST, "/ai/stream/**").permitAll()
+						.requestMatchers(GET, "/ai/health").permitAll()
 
-				// Metrics
-				.requestMatchers(GET, "/actuator/**").permitAll()
+						// Metrics
+						.requestMatchers(GET, "/actuator/**").permitAll()
 
-				.anyRequest().authenticated());
+						.anyRequest().authenticated());
 
 		// ❗ 인증 Filter 추가
 		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -122,6 +124,8 @@ public class SecurityConfig {
 		// configuration.setAllowedHeaders(List.of("Authorization")); // 필요에 따라 open 예정.
 		// configuration.setExposedHeaders(List.of("Authorization")); // 필요에 따라 open 예정.
 		configuration.setAllowedHeaders(List.of("Content-Type"));
+		configuration.setExposedHeaders(
+				List.of("X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "Retry-After"));
 		configuration.setMaxAge(3600L);
 
 		return request -> configuration;

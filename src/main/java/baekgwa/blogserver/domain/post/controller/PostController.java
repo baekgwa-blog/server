@@ -16,6 +16,7 @@ import baekgwa.blogserver.domain.post.type.PostListSort;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
+import baekgwa.blogserver.global.util.ClientIpUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,11 +55,20 @@ public class PostController {
 	@GetMapping("/detail")
 	@Operation(summary = "포스트 상세 조회")
 	public BaseResponse<PostResponse.GetPostDetailResponse> searchPost(
-		@RequestParam(value = "slug", required = true) String slug,
+		@RequestParam(value = "slug", required = true) String slug
+	) {
+		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug);
+		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
+	}
+
+	@PostMapping("/{slug}/view")
+	@Operation(summary = "포스트 조회수 증가")
+	public BaseResponse<Void> increaseViewCount(
+		@PathVariable String slug,
 		HttpServletRequest request
 	) {
-		PostResponse.GetPostDetailResponse response = postService.getPostDetail(slug, request.getRemoteAddr());
-		return BaseResponse.success(SuccessCode.REQUEST_SUCCESS, response);
+		postService.increaseViewCount(slug, ClientIpUtils.extract(request));
+		return BaseResponse.success(SuccessCode.INCREASE_VIEW_COUNT_SUCCESS);
 	}
 
 	@GetMapping
