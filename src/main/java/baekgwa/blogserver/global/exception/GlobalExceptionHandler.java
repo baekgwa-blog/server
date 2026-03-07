@@ -3,6 +3,7 @@ package baekgwa.blogserver.global.exception;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
@@ -97,6 +98,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(GlobalException.class)
 	public ResponseEntity<BaseResponse<Void>> handleDomainException(GlobalException e) {
 		return ResponseEntity.status(e.getErrorCode().getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(BaseResponse.fail(e.getErrorCode()));
 	}
 
