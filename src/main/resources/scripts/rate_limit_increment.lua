@@ -2,4 +2,7 @@ local count = redis.call('INCR', KEYS[1])
 if count == 1 then
   redis.call('EXPIRE', KEYS[1], ARGV[1])
 end
-return count
+
+local ttl = redis.call('TTL', KEYS[1])
+
+return {count, ttl}

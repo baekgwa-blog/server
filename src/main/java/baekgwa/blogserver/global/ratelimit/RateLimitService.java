@@ -1,7 +1,6 @@
 package baekgwa.blogserver.global.ratelimit;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,12 +17,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RateLimitService {
 
-	private static final DefaultRedisScript<Long> INCREMENT_SCRIPT;
+	private static final DefaultRedisScript<List<Long>> INCREMENT_SCRIPT;
 
 	static {
 		INCREMENT_SCRIPT = new DefaultRedisScript<>();
 		INCREMENT_SCRIPT.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/rate_limit_increment.lua")));
-		INCREMENT_SCRIPT.setResultType(Long.class);
+		//noinspection unchecked
+		INCREMENT_SCRIPT.setResultType((Class<List<Long>>)(Class<?>) List.class);
 	}
 
 	private final StringRedisTemplate stringRedisTemplate;
@@ -32,19 +32,16 @@ public class RateLimitService {
 	public RateLimitResult checkAndIncrement(HttpServletRequest request) {
 		String key = "rate:limit:ai:search:" + ClientIpUtils.extract(request);
 
-		Long count = stringRedisTemplate.execute(
+		List<Long> result = stringRedisTemplate.execute(
 			INCREMENT_SCRIPT,
 			List.of(key),
 			String.valueOf(rateLimitProperties.getWindowSeconds())
 		);
-		if (count == null) {
-			count = 1L;
-		}
 
-		Long ttl = stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
-		if (ttl == null || ttl < 0) {
-			ttl = (long) rateLimitProperties.getWindowSeconds();
-		}
+		long count = (result != null && result.get(0) != null) ? result.get(0) : 1L;
+		long ttl = (result != null && result.get(1) != null && result.get(1) > 0)
+			? result.get(1)
+			: (long) rateLimitProperties.getWindowSeconds();
 
 		long resetAt = System.currentTimeMillis() / 1000 + ttl;
 		long remaining = Math.max(0, rateLimitProperties.getLimit() - count);
