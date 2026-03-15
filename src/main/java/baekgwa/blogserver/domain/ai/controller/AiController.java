@@ -9,7 +9,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import baekgwa.blogserver.domain.ai.dto.AiRequest;
 import baekgwa.blogserver.domain.ai.dto.AiResponse;
-import baekgwa.blogserver.domain.ai.dto.EmbeddingPostRequest;
 import baekgwa.blogserver.domain.ai.service.AiService;
 import baekgwa.blogserver.global.response.BaseResponse;
 import baekgwa.blogserver.global.response.SuccessCode;
@@ -28,6 +27,7 @@ import lombok.RequiredArgsConstructor;
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
  * 25. 11. 10.     Baekgwa               Initial creation
+ * 2026-03-15     Baekgwa               수동 임베딩 엔드포인트 제거 (Data Pipeline 이관)
  */
 @RestController
 @RequiredArgsConstructor
@@ -45,15 +45,6 @@ public class AiController {
 		SseEmitter emitter = new SseEmitter(60_000L);
 		aiService.searchPosts(request, emitter);
 		return emitter;
-	}
-
-	@PostMapping("/post/embedding")
-	@Operation(summary = "수동 post embedding 후, vector db 에 저장")
-	public BaseResponse<Void> embeddingPost(
-		@RequestBody EmbeddingPostRequest request
-	) {
-		aiService.embeddingPosts(request);
-		return BaseResponse.success(SuccessCode.EMBEDDING_POST_SUCCESS);
 	}
 
 	@GetMapping("/health")
