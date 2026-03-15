@@ -1,6 +1,7 @@
 package baekgwa.blogserver.domain.post.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -8,7 +9,6 @@ import org.jsoup.nodes.Element;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +26,6 @@ import baekgwa.blogserver.global.exception.GlobalException;
 import baekgwa.blogserver.global.response.ErrorCode;
 import baekgwa.blogserver.global.response.PageResponse;
 import baekgwa.blogserver.global.util.SlugUtil;
-import baekgwa.blogserver.infra.embedding.event.EmbeddingCreatePostEvent;
-import baekgwa.blogserver.infra.embedding.event.EmbeddingDeletePostEvent;
 import baekgwa.blogserver.infra.view.type.ViewDomain;
 import baekgwa.blogserver.infra.view.updater.ViewCountUpdater;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
@@ -48,11 +46,12 @@ import lombok.extern.slf4j.Slf4j;
  * FileName    : PostService
  * Author      : Baekgwa
  * Date        : 2025-06-19
- * Description : 
+ * Description :
  * =====================================================================================================================
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-19     Baekgwa               Initial creation
+ * 2026-03-15     Baekgwa               임베딩 책임 Data Pipeline 이관 - ApplicationEventPublisher → RedisStreamPublisher
  */
 @Slf4j
 @Service
@@ -68,7 +67,7 @@ public class PostService {
 	private final CategoryRepository categoryRepository;
 
 	private final ViewCountUpdater viewCountUpdater;
-	private final ApplicationEventPublisher eventPublisher;
+	private final PostEventService postEventService;
 
 	@Caching(
 		evict = {
@@ -104,7 +103,15 @@ public class PostService {
 		List<PostTagEntity> newPostTag = findTagEntityList.stream().map(tag -> PostTagEntity.of(newPost, tag)).toList();
 		postTagRepository.saveAll(newPostTag);
 
-		eventPublisher.publishEvent(new EmbeddingCreatePostEvent(newPost, findTagEntityList));
+		postEventService.publishPostCreated(
+			newPost.getId(),
+			newPost.getTitle(),
+			newPost.getContent(),
+			newPost.getDescription(),
+			findCategory.getName(),
+			findTagEntityList.stream().map(TagEntity::getName).collect(Collectors.toList()),
+			generatedSlug
+		);
 
 		return PostResponse.CreatePostResponse.from(generatedSlug);
 	}
@@ -187,8 +194,7 @@ public class PostService {
 
 		postRepository.deleteBySlug(slug);
 
-		// delete post embedding event 발행
-		eventPublisher.publishEvent(new EmbeddingDeletePostEvent(findPost.getId()));
+		postEventService.publishPostDeleted(findPost.getId());
 	}
 
 	private String extractThumbnailByContent(@NonNull String content) {

@@ -23,4 +23,7 @@ public interface PostTagRepository extends JpaRepository<PostTagEntity, Long> {
 
 	@EntityGraph(attributePaths = {"tag"})
 	List<PostTagEntity> findAllByPost(PostEntity post);
+
+	@EntityGraph(attributePaths = {"tag", "post"})
+	List<PostTagEntity> findAllByPostIn(List<PostEntity> posts);
 }

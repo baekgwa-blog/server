@@ -90,6 +90,7 @@ public class SecurityConfig {
 						// Post
 						.requestMatchers(GET, "/post/detail").permitAll()
 						.requestMatchers(GET, "/post").permitAll()
+						.requestMatchers(GET, "/post/recommendation").permitAll()
 						.requestMatchers(POST, "/post/{slug}/view").permitAll()
 
 						// Stack

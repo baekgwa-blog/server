@@ -1,5 +1,6 @@
 package baekgwa.blogserver.model.post.post.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -30,4 +31,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long>, PostRep
 	Optional<PostEntity> findBySlug(String slug);
 
 	void deleteBySlug(String slug);
+
+	@EntityGraph(attributePaths = {"category"})
+	List<PostEntity> findAllByIdIn(List<Long> ids);
 }

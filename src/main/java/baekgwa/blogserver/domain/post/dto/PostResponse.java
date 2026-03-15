@@ -1,6 +1,7 @@
 package baekgwa.blogserver.domain.post.dto;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import com.querydsl.core.annotations.QueryProjection;
@@ -107,6 +108,22 @@ public class PostResponse {
 		// 태그 리스트를 나중에 넣어주기 위한 메서드
 		public void updateTagList(List<String> tagList) {
 			this.tagList = tagList;
+		}
+
+		public static GetPostResponse from(PostEntity post, List<String> tagList) {
+			GetPostResponse response = GetPostResponse.builder()
+				.id(post.getId())
+				.title(post.getTitle())
+				.description(post.getDescription())
+				.thumbnailImage(post.getThumbnailImage())
+				.slug(post.getSlug())
+				.viewCount(post.getViewCount())
+				.category(post.getCategory().getName())
+				.createdAt(post.getCreatedAt())
+				.modifiedAt(post.getModifiedAt())
+				.build();
+			response.updateTagList(tagList != null ? tagList : Collections.emptyList());
+			return response;
 		}
 	}
 }

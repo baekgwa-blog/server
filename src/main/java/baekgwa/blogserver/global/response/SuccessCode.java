@@ -53,6 +53,9 @@ public enum SuccessCode {
 	EMBEDDING_POST_SUCCESS(HttpStatus.CREATED, "게시글 임베딩 성공"),
 	ENABLE_CHAT_BOT(HttpStatus.OK, "Chatbot health check 성공"),
 
+	//추천
+	GET_RECOMMENDATION_SUCCESS(HttpStatus.OK, "추천 포스트 조회 성공."),
+
 	//Common
 	REQUEST_SUCCESS(HttpStatus.OK, "요청 응답 성공.");
 
