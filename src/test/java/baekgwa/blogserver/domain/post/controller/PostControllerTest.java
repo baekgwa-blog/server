@@ -1,9 +1,12 @@
 package baekgwa.blogserver.domain.post.controller;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -20,17 +23,19 @@ import baekgwa.blogserver.integration.SpringBootTestSupporter;
 import baekgwa.blogserver.model.category.entity.CategoryEntity;
 import baekgwa.blogserver.model.post.post.entity.PostEntity;
 import baekgwa.blogserver.model.tag.entity.TagEntity;
+import jakarta.servlet.http.Cookie;
 
 /**
  * PackageName : baekgwa.blogserver.domain.post.controller
  * FileName    : PostControllerTest
  * Author      : Baekgwa
  * Date        : 2025-06-20
- * Description : 
+ * Description :
  * =====================================================================================================================
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-20     Baekgwa               Initial creation
+ * 2026-03-15     Baekgwa               세션 쿠키, 행동 이벤트, 추천 API 테스트 추가
  */
 @Transactional
 class PostControllerTest extends SpringBootTestSupporter {
@@ -85,7 +90,7 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data").isEmpty());
 	}
 
-	@DisplayName("포스팅 상세 조회")
+	@DisplayName("포스팅 상세 조회 - sid 쿠키가 없으면 새로 발급됩니다.")
 	@Test
 	void searchPost1() throws Exception {
 		// given
@@ -108,7 +113,65 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.thumbnailImage").isNotEmpty())
 			.andExpect(jsonPath("$.data.slug").isNotEmpty())
 			.andExpect(jsonPath("$.data.tagList").isArray())
-			.andExpect(jsonPath("$.data.category").isNotEmpty());
+			.andExpect(jsonPath("$.data.category").isNotEmpty())
+			.andExpect(cookie().exists("sid"));
+	}
+
+	@DisplayName("포스팅 상세 조회 - sid 쿠키가 있으면 POST_VIEWED 행동 이벤트가 발행됩니다.")
+	@Test
+	void searchPost2() throws Exception {
+		// given
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		String savePostSlug = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst().getSlug();
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/post/detail")
+			.param("slug", savePostSlug)
+			.cookie(new Cookie("sid", "existing-session-id")));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.data.title").isNotEmpty());
+	}
+
+	@DisplayName("포스트 조회수 증가 - 정상적으로 조회수가 증가합니다.")
+	@Test
+	void increaseViewCount1() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
+
+		// when
+		ResultActions perform = mockMvc.perform(post("/post/{slug}/view", savePost.getSlug()));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.INCREASE_VIEW_COUNT_SUCCESS.getMessage()));
+	}
+
+	@DisplayName("포스트 조회수 증가 - sid 쿠키 유무와 관계없이 조회수가 증가합니다.")
+	@Test
+	void increaseViewCount2() throws Exception {
+		// given
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(1);
+		PostEntity savePost = postDataFactory.newPostList(1, saveTagList, saveCategory).getFirst();
+
+		// when
+		ResultActions perform = mockMvc.perform(post("/post/{slug}/view", savePost.getSlug())
+			.cookie(new Cookie("sid", "test-session-id")));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.INCREASE_VIEW_COUNT_SUCCESS.getMessage()));
 	}
 
 	@DisplayName("포스팅 목록 조회 및 검색")
@@ -167,6 +230,42 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.data.content.length()").value(2));
 	}
 
+	@DisplayName("키워드 검색 시 sid 쿠키가 있으면 행동 이벤트가 발행됩니다.")
+	@Test
+	void searchPostList3() throws Exception {
+		// given
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		postDataFactory.newPostList(5, saveTagList, saveCategory);
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/post")
+			.param("keyword", "제목")
+			.cookie(new Cookie("sid", "test-session-id")));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true));
+	}
+
+	@DisplayName("키워드가 없으면 행동 이벤트가 발행되지 않습니다.")
+	@Test
+	void searchPostList4() throws Exception {
+		// given
+		List<TagEntity> saveTagList = tagDataFactory.newTagList(2);
+		CategoryEntity saveCategory = categoryDataFactory.newCategoryList(1).getFirst();
+		postDataFactory.newPostList(5, saveTagList, saveCategory);
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/post")
+			.cookie(new Cookie("sid", "test-session-id")));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk());
+	}
+
 	@WithMockUser
 	@DisplayName("포스트 글을 삭제합니다.")
 	@Test
@@ -206,5 +305,40 @@ class PostControllerTest extends SpringBootTestSupporter {
 			.andExpect(jsonPath("$.message").value(ErrorCode.NEED_LOGIN.getMessage()))
 			.andExpect(jsonPath("$.code").value(ErrorCode.NEED_LOGIN.getCode()))
 			.andExpect(jsonPath("$.data").isEmpty());
+	}
+
+	@DisplayName("sid 쿠키가 없으면 추천 포스트 조회는 빈 리스트를 반환합니다.")
+	@Test
+	void getRecommendation1() throws Exception {
+		// when
+		ResultActions perform = mockMvc.perform(get("/post/recommendation"));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.GET_RECOMMENDATION_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.data").isArray())
+			.andExpect(jsonPath("$.data.length()").value(0));
+	}
+
+	@DisplayName("sid 쿠키가 있으면 RecommendationService 를 호출하여 추천 포스트를 반환합니다.")
+	@Test
+	void getRecommendation2() throws Exception {
+		// given
+		String sessionId = "test-session-uuid";
+		given(recommendationService.getRecommendations(eq(sessionId), eq(5))).willReturn(Collections.emptyList());
+
+		// when
+		ResultActions perform = mockMvc.perform(get("/post/recommendation")
+			.param("size", "5")
+			.cookie(new Cookie("sid", sessionId)));
+
+		// then
+		perform.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isSuccess").value(true))
+			.andExpect(jsonPath("$.message").value(SuccessCode.GET_RECOMMENDATION_SUCCESS.getMessage()))
+			.andExpect(jsonPath("$.data").isArray());
 	}
 }

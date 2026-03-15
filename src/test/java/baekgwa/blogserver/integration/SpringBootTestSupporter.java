@@ -15,20 +15,19 @@ import baekgwa.blogserver.domain.ai.service.AiService;
 import baekgwa.blogserver.domain.authentication.service.AuthService;
 import baekgwa.blogserver.domain.category.service.CategoryService;
 import baekgwa.blogserver.domain.post.service.PostService;
+import baekgwa.blogserver.domain.post.service.RecommendationService;
 import baekgwa.blogserver.domain.stack.service.StackService;
 import baekgwa.blogserver.domain.tag.service.TagService;
-import baekgwa.blogserver.infra.embedding.service.EmbeddingFailureService;
 import baekgwa.blogserver.infra.embedding.service.EmbeddingService;
+import baekgwa.blogserver.infra.stream.RedisStreamPublisher;
 import baekgwa.blogserver.infra.upload.FileUploader;
 import baekgwa.blogserver.infra.view.scheduler.ViewCountBatchService;
 import baekgwa.blogserver.infra.view.store.ViewCountStore;
 import baekgwa.blogserver.integration.factory.CategoryDataFactory;
-import baekgwa.blogserver.integration.factory.EmbeddingFailureDataFactory;
 import baekgwa.blogserver.integration.factory.PostDataFactory;
 import baekgwa.blogserver.integration.factory.StackDataFactory;
 import baekgwa.blogserver.integration.factory.TagDataFactory;
 import baekgwa.blogserver.model.category.repository.CategoryRepository;
-import baekgwa.blogserver.model.embedding.repository.EmbeddingFailureRepository;
 import baekgwa.blogserver.model.post.post.repository.PostRepository;
 import baekgwa.blogserver.model.post.tag.repository.PostTagRepository;
 import baekgwa.blogserver.model.stack.post.repository.StackPostRepository;
@@ -43,11 +42,12 @@ import software.amazon.awssdk.services.s3.S3Client;
  * FileName    : SpringBootTestSupporter
  * Author      : Baekgwa
  * Date        : 2025-06-09
- * Description : 
+ * Description :
  * =====================================================================================================================
  * DATE          AUTHOR               NOTE
  * ---------------------------------------------------------------------------------------------------------------------
  * 2025-06-09     Baekgwa               Initial creation
+ * 2026-03-15     Baekgwa               임베딩 파이프라인 제거, RedisStreamPublisher Mock 추가
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -71,8 +71,6 @@ public abstract class SpringBootTestSupporter {
 	protected PostDataFactory postDataFactory;
 	@Autowired
 	protected StackDataFactory stackDataFactory;
-	@Autowired
-	protected EmbeddingFailureDataFactory embeddingFailureDataFactory;
 
 	/**
 	 * Common
@@ -97,8 +95,6 @@ public abstract class SpringBootTestSupporter {
 	protected StackRepository stackRepository;
 	@Autowired
 	protected StackPostRepository stackPostRepository;
-	@Autowired
-	protected EmbeddingFailureRepository embeddingFailureRepository;
 
 	/**
 	 * service
@@ -117,8 +113,6 @@ public abstract class SpringBootTestSupporter {
 	protected AiService aiService;
 	@Autowired
 	protected ViewCountBatchService viewCountBatchService;
-	@Autowired
-	protected EmbeddingFailureService embeddingFailureService;
 
 	/**
 	 * MockBean
@@ -137,6 +131,10 @@ public abstract class SpringBootTestSupporter {
 	protected RestClient restClient;
 	@MockitoBean(name = "openAiRestTemplate")
 	protected RestTemplate openAiRestTemplate;
+	@MockitoBean
+	protected RedisStreamPublisher redisStreamPublisher;
+	@MockitoBean
+	protected RecommendationService recommendationService;
 
 	/**
 	 * Static variable
